@@ -7,10 +7,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class Parser {
 	
+	URL path = getClass().getResource("wiltshireRoadsNoRelations.osm");
+
 	File xmlFile;
 	int nodeCounter = 0;
 	int wayCounter = 0;
@@ -28,7 +32,12 @@ public class Parser {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		xmlFile = new File("C:/Users/Home-Laptop/Downloads/osmosis-latest/bin/wiltshireRoadsNoRelations.osm");
+		try {
+			xmlFile = new File(path.toURI());
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try (BufferedReader br = new BufferedReader(new FileReader(xmlFile))){
 			String line;
 			while ((line = br.readLine()) != null){
