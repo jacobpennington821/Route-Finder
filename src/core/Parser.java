@@ -22,6 +22,7 @@ public class Parser {
 	ArrayList<Arc> arcTest = new ArrayList<Arc>();
 	boolean inWay = false;
 	String tempId;
+	ArrayList<String> nodeList = new ArrayList<String>();
 	
 	public Parser(){
 		PrintStream out;
@@ -32,12 +33,14 @@ public class Parser {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
 		try {
 			xmlFile = new File(path.toURI());
 		} catch (URISyntaxException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
 		try (BufferedReader br = new BufferedReader(new FileReader(xmlFile))){
 			String line;
 			while ((line = br.readLine()) != null){
@@ -45,7 +48,7 @@ public class Parser {
 				//System.out.println(line);
 			}
 			for(int i = 0; i < test.size(); i++){
-				test.get(i).printInfo();
+				//test.get(i).printInfo();
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -85,7 +88,25 @@ public class Parser {
 				}
 			}else{
 				if(line.substring(5,7).equals("nd")){
-					
+					System.out.println("node line");
+					nodeList.add(line.substring(13, 13 + line.substring(13).indexOf('"')));
+				}else{
+					if(line.substring(5,7).equals("ta")){
+						System.out.println("tag line");
+						// get node tag name key value
+					}else{
+						inWay = false;
+						for(int i = 0; i < nodeList.size(); i++){
+							for(int f = 0; f < test.size(); f++){
+								if(test.get(f).getId().equals(nodeList.get(i))){
+									//test.get(i).arcList.add(new Arc());
+								}
+							}
+							//System.out.println(nodeList.get(i));
+						}
+						// Construct Arcs
+						parse(line);
+					}
 				}
 			}
 		}
