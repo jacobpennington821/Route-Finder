@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Parser {
 	
@@ -18,7 +19,8 @@ public class Parser {
 	File xmlFile;
 	int nodeCounter = 0;
 	int wayCounter = 0;
-	ArrayList<Vertex> test = new ArrayList<Vertex>();
+	//ArrayList<Vertex> vertexMap = new ArrayList<Vertex>();
+	HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>();
 	ArrayList<Arc> arcTest = new ArrayList<Arc>();
 	boolean inWay = false;
 	String tempId;
@@ -47,9 +49,10 @@ public class Parser {
 				parse(line);
 				//System.out.println(line);
 			}
-			for(int i = 0; i < test.size(); i++){
-				//test.get(i).printInfo();
+			for(String key : vertexMap.keySet()){
+				System.out.println(vertexMap.get(key).getLat() + ", " + vertexMap.get(key).getLon());
 			}
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.out.println("File Not Found");
@@ -60,8 +63,7 @@ public class Parser {
 	}
 	
 	public void parse(String line){
-		
-		if(line.length() > 8){
+		if(line.length() > 8){ // Discount any lines like </way>
 			if(!inWay){
 				if(line.substring(3, 7).equals("node")){
 					String id = line.substring(12, line.indexOf("\"", 12));
@@ -70,7 +72,7 @@ public class Parser {
 					double lat = Double.parseDouble(line.substring(latLocationInString,latLocationInString + line.substring(latLocationInString).indexOf("\"")));
 					double lon = Double.parseDouble(line.substring(lonLocationInString,lonLocationInString + line.substring(lonLocationInString).indexOf("\"")));
 					nodeCounter++;
-					test.add(new Vertex(id,lat,lon));
+					vertexMap.put(id,new Vertex(id,lat,lon));
 					//System.out.println("node" + line.substring(12, line.indexOf('"', 12)));
 					//System.out.println(lat);
 					//System.out.println(lon);
@@ -96,14 +98,7 @@ public class Parser {
 						// get node tag name key value
 					}else{
 						inWay = false;
-						for(int i = 0; i < nodeList.size(); i++){
-							for(int f = 0; f < test.size(); f++){
-								if(test.get(f).getId().equals(nodeList.get(i))){
-									//test.get(i).arcList.add(new Arc());
-								}
-							}
-							//System.out.println(nodeList.get(i));
-						}
+						
 						// Construct Arcs
 						parse(line);
 					}

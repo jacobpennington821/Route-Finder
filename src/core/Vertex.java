@@ -16,13 +16,13 @@ public class Vertex {
 	
 	public Vertex(String id,double lat, double lon){
 		this.setId(id);
-		this.lat = lat;
-		this.lon = lon;
+		this.setLat(lat);
+		this.setLon(lon);
 		this.arcList = new ArrayList<Arc>();
 	}
 	
 	public void printInfo(){
-		System.out.println("ID: " + getId() + ", lat: " + lat + ", lon: " + lon);
+		System.out.println("ID: " + getId() + ", lat: " + getLat() + ", lon: " + getLon());
 	}
 
 	public String getId() {
@@ -31,6 +31,22 @@ public class Vertex {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public double getLat() {
+		return lat;
+	}
+
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+
+	public double getLon() {
+		return lon;
+	}
+
+	public void setLon(double lon) {
+		this.lon = lon;
 	}
 
 }
