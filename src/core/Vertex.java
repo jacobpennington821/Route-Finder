@@ -4,21 +4,21 @@ import java.util.ArrayList;
 
 public class Vertex {
 
-	public ArrayList<Arc> arcList;
+	public ArrayList<String> arcList;
 	private String id;
 	private double lat;
 	private double lon;
 	
 	public Vertex(String id){
 		this.setId(id);
-		this.arcList = new ArrayList<Arc>();
+		this.arcList = new ArrayList<String>();
 	}
 	
 	public Vertex(String id,double lat, double lon){
 		this.setId(id);
 		this.setLat(lat);
 		this.setLon(lon);
-		this.arcList = new ArrayList<Arc>();
+		this.arcList = new ArrayList<String>();
 	}
 	
 	public void printInfo(){

@@ -40,7 +40,7 @@ public class Parser {
 		PrintStream out;
 		try {
 			out = new PrintStream(new FileOutputStream("output.txt"));
-			//System.setOut(out);
+			System.setOut(out);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -115,12 +115,24 @@ public class Parser {
 						tempWay.tagList.put(key, value);
 					}else{
 						inWay = false;
-						
+						for(int i = 0; i < tempWay.nodeList.size() - 1; i++){
+							String start = tempWay.nodeList.get(i);
+							String end = tempWay.nodeList.get(i + 1);
+							String id = tempWay.id + "-" + i;
+							Arc tempArc = new Arc(start,end,id,tempWay.tagList);
+							arcMap.put(id, tempArc);
+							
+							System.out.println(start + ", " + end + ", " + id);
+						}
 						// Construct Arcs
 						parse(line);
 					}
 				}
 			}
 		}
+	}
+	
+	private void constructArc(){
+		
 	}
 }
