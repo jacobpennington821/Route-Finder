@@ -24,10 +24,14 @@ public class Parser {
 	HashMap<String,Arc> arcMap = new HashMap<String,Arc>();
 	ArrayList<Arc> arcTest = new ArrayList<Arc>();
 	boolean inWay = false;
-	String tempId;
-	ArrayList<String> nodeList = new ArrayList<String>();
+	TempWay tempWay;
+	//ArrayList<String> nodeList = new ArrayList<String>();
 	
-	private class TempArc{
+	private class TempWay{
+		String id;
+		public TempWay(String id){
+			this.id = id;
+		}
 		public ArrayList<String> nodeList = new ArrayList<String>();
 		public HashMap<String,String> tagList = new HashMap<String, String>();
 	}
@@ -87,7 +91,8 @@ public class Parser {
 					if(line.substring(3,7).equals("way ")){
 						inWay = true;
 						wayCounter++;
-						tempId = line.substring(11, 11 + line.substring(11).indexOf("\""));
+						String tempId = line.substring(11, 11 + line.substring(11).indexOf("\""));
+						tempWay = new TempWay(tempId);
 						System.out.println(tempId);
 						//find next lines
 						System.out.println("way" + wayCounter);
@@ -97,11 +102,17 @@ public class Parser {
 			}else{
 				if(line.substring(5,7).equals("nd")){
 					System.out.println("node line");
-					nodeList.add(line.substring(13, 13 + line.substring(13).indexOf('"')));
+					tempWay.nodeList.add(line.substring(13, 13 + line.substring(13).indexOf('"')));
 				}else{
 					if(line.substring(5,7).equals("ta")){
 						System.out.println("tag line");
-						// get node tag name key value
+						int keyIndex = line.indexOf("k=\"") + 3;
+						String key = line.substring(keyIndex,keyIndex + line.substring(keyIndex).indexOf('"'));
+						System.out.println(key);
+						int valueIndex = line.indexOf("v=\"") + 3;
+						String value = line.substring(valueIndex,valueIndex + line.substring(valueIndex).indexOf('"'));
+						System.out.println(value);
+						tempWay.tagList.put(key, value);
 					}else{
 						inWay = false;
 						
