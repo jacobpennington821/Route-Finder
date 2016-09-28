@@ -21,10 +21,16 @@ public class Parser {
 	int wayCounter = 0;
 	//ArrayList<Vertex> vertexMap = new ArrayList<Vertex>();
 	HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>();
+	HashMap<String,Arc> arcMap = new HashMap<String,Arc>();
 	ArrayList<Arc> arcTest = new ArrayList<Arc>();
 	boolean inWay = false;
 	String tempId;
 	ArrayList<String> nodeList = new ArrayList<String>();
+	
+	private class TempArc{
+		public ArrayList<String> nodeList = new ArrayList<String>();
+		public HashMap<String,String> tagList = new HashMap<String, String>();
+	}
 	
 	public Parser(){
 		PrintStream out;
@@ -81,7 +87,7 @@ public class Parser {
 					if(line.substring(3,7).equals("way ")){
 						inWay = true;
 						wayCounter++;
-						tempId = line.substring(11,11+line.substring(11).indexOf("\""));
+						tempId = line.substring(11, 11 + line.substring(11).indexOf("\""));
 						System.out.println(tempId);
 						//find next lines
 						System.out.println("way" + wayCounter);
@@ -106,5 +112,4 @@ public class Parser {
 			}
 		}
 	}
-	
 }
