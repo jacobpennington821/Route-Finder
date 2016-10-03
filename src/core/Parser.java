@@ -59,13 +59,14 @@ public class Parser {
 				parse(line);
 				//System.out.println(line);
 			}
-			for(String key : vertexMap.keySet()){
+			/*for(String key : vertexMap.keySet()){
 				System.out.println("Id: " + vertexMap.get(key).getId());
 				System.out.println("Lat: " + vertexMap.get(key).getLat() + ", Lon: " + vertexMap.get(key).getLon());
 				for(int i = 0; i < vertexMap.get(key).arcList.size(); i++){
 					System.out.println("  " + vertexMap.get(key).arcList.get(i));
 				}
-			}
+			}*/
+		Graph map = new Graph(vertexMap, arcMap);
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
