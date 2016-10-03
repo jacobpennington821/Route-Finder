@@ -108,10 +108,10 @@ public class Parser {
 						System.out.println("tag line");
 						int keyIndex = line.indexOf("k=\"") + 3;
 						String key = line.substring(keyIndex,keyIndex + line.substring(keyIndex).indexOf('"'));
-						System.out.println(key);
+						//System.out.println(key);
 						int valueIndex = line.indexOf("v=\"") + 3;
 						String value = line.substring(valueIndex,valueIndex + line.substring(valueIndex).indexOf('"'));
-						System.out.println(value);
+						//System.out.println(value);
 						tempWay.tagList.put(key, value);
 					}else{
 						inWay = false;
@@ -121,8 +121,17 @@ public class Parser {
 							String id = tempWay.id + "-" + i;
 							Arc tempArc = new Arc(start,end,id,tempWay.tagList);
 							arcMap.put(id, tempArc);
-							
+							vertexMap.get(start).arcList.add(id);
+							vertexMap.get(end).arcList.add(id);
 							System.out.println(start + ", " + end + ", " + id);
+							for(int it = 0; it < vertexMap.get(start).arcList.size(); it++){
+								System.out.println("Start arcs: " + vertexMap.get(start).arcList.get(it));
+								
+							}
+							for(int it = 0; it < vertexMap.get(end).arcList.size(); it++){
+								System.out.println("End arcs: " + vertexMap.get(end).arcList.get(it));
+								
+							}
 						}
 						// Construct Arcs
 						parse(line);
