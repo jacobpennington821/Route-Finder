@@ -60,7 +60,11 @@ public class Parser {
 				//System.out.println(line);
 			}
 			for(String key : vertexMap.keySet()){
-				System.out.println(vertexMap.get(key).getLat() + ", " + vertexMap.get(key).getLon());
+				System.out.println("Id: " + vertexMap.get(key).getId());
+				System.out.println("Lat: " + vertexMap.get(key).getLat() + ", Lon: " + vertexMap.get(key).getLon());
+				for(int i = 0; i < vertexMap.get(key).arcList.size(); i++){
+					System.out.println("  " + vertexMap.get(key).arcList.get(i));
+				}
 			}
 
 		} catch (FileNotFoundException e) {
@@ -124,14 +128,14 @@ public class Parser {
 							vertexMap.get(start).arcList.add(id);
 							vertexMap.get(end).arcList.add(id);
 							System.out.println(start + ", " + end + ", " + id);
-							for(int it = 0; it < vertexMap.get(start).arcList.size(); it++){
+							/*for(int it = 0; it < vertexMap.get(start).arcList.size(); it++){
 								System.out.println("Start arcs: " + vertexMap.get(start).arcList.get(it));
 								
 							}
 							for(int it = 0; it < vertexMap.get(end).arcList.size(); it++){
 								System.out.println("End arcs: " + vertexMap.get(end).arcList.get(it));
 								
-							}
+							}*/
 						}
 						// Construct Arcs
 						parse(line);

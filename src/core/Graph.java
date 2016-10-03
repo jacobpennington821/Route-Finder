@@ -10,6 +10,17 @@ public class Graph {
 	public Graph(HashMap<String,Vertex> vertexMap, HashMap<String,Arc> arcMap){
 		this.vertexMap = vertexMap;
 		this.arcMap = arcMap;
+		calculateWeights();
+	}
+	
+	public Graph shortestRoute(){
+		return null;
+	}
+	
+	private void calculateWeights(){
+		for(String key : arcMap.keySet()){
+			
+		}
 	}
 
 }
