@@ -12,7 +12,7 @@ public class Graph {
 	public Graph(HashMap<String,Vertex> vertexMap, HashMap<String,Arc> arcMap){
 		this.vertexMap = vertexMap;
 		this.arcMap = arcMap;
-		calculateWeights();
+		this.calculateWeights();
 		for(String key : vertexMap.keySet()){
 			System.out.println("Id: " + vertexMap.get(key).getId());
 			System.out.println("Lat: " + vertexMap.get(key).getLat() + ", Lon: " + vertexMap.get(key).getLon());
@@ -23,7 +23,8 @@ public class Graph {
 
 	}
 	
-	public Graph shortestRoute(){
+	public Graph shortestRoute(String source, String end){
+		// Need two maps, visited and unvisited
 		return null;
 	}
 	
