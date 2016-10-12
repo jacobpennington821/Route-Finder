@@ -39,7 +39,7 @@ public class Parser {
 	public Parser(){
 		PrintStream out;
 		try {
-			out = new PrintStream(new FileOutputStream("output.txt"));
+			out = new PrintStream(new FileOutputStream("output.log"));
 			System.setOut(out);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
