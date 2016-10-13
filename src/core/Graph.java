@@ -1,5 +1,6 @@
 package core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Graph {
@@ -20,10 +21,34 @@ public class Graph {
 				System.out.println("  " + vertexMap.get(key).arcList.get(i) + " - " + arcMap.get(vertexMap.get(key).arcList.get(i)).getWeight());
 			}
 		}
+		this.shortestRoute("33071154", "2062355426");
 
 	}
 	
-	public Graph shortestRoute(String source, String end){
+	public Graph shortestRoute(String source, String destination){
+		ArrayList<String> unsettledVertexes = new ArrayList<String>();
+		ArrayList<String> settledVertexes = new ArrayList<String>();
+		vertexMap.get(source).setDistanceFromSource(0);
+		for(int i = 0; i < vertexMap.get(source).arcList.size(); i++){
+			if(source.equals(arcMap.get(vertexMap.get(source).arcList.get(i)).getStart())){
+				vertexMap.get(arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd()).setDistanceFromSource(arcMap.get(vertexMap.get(source).arcList.get(i)).getWeight());
+				unsettledVertexes.add(arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd());
+			}
+			else{
+				if(source.equals(arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd())){
+					vertexMap.get(arcMap.get(vertexMap.get(source).arcList.get(i)).getStart()).setDistanceFromSource(arcMap.get(vertexMap.get(source).arcList.get(i)).getWeight());
+					unsettledVertexes.add(arcMap.get(vertexMap.get(source).arcList.get(i)).getStart());
+				}
+				else{
+					System.out.println("Node is not end or start of arc: " + source + " is not: " + arcMap.get(vertexMap.get(source).arcList.get(i)).getStart() + ", or: " + arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd());
+				}
+			}
+			//vertexMap.get(source).arcList.get(i)
+		}
+		for(int jeff = 0; jeff < unsettledVertexes.size(); jeff++){
+			System.out.println(unsettledVertexes.get(jeff));
+		}
+		
 		// Need two maps, visited and unvisited
 		return null;
 	}

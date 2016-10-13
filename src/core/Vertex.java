@@ -8,6 +8,7 @@ public class Vertex {
 	private String id;
 	private double lat;
 	private double lon;
+	private double distanceFromSource = Double.MAX_VALUE;
 	
 	public Vertex(String id){
 		this.setId(id);
@@ -47,6 +48,17 @@ public class Vertex {
 
 	public void setLon(double lon) {
 		this.lon = lon;
+	}
+
+	public double getDistanceFromSource() {
+		return distanceFromSource;
+	}
+
+	public void setDistanceFromSource(double distanceFromSource) {
+		if(distanceFromSource < 0){
+			return;
+		}
+		this.distanceFromSource = distanceFromSource;
 	}
 
 }

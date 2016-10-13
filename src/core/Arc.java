@@ -7,7 +7,7 @@ public class Arc {
 	private String start;
 	private String end;
 	public String id;
-	private double weight;
+	public double weight;
 	public HashMap<String,String> tagList = new HashMap<String, String>();
 
 	
