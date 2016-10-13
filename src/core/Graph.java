@@ -2,6 +2,8 @@ package core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Graph {
 	
@@ -21,36 +23,91 @@ public class Graph {
 				System.out.println("  " + vertexMap.get(key).arcList.get(i) + " - " + arcMap.get(vertexMap.get(key).arcList.get(i)).getWeight());
 			}
 		}
-		this.shortestRoute("33071154", "2062355426");
+		this.shortestRoute("268229", "2476991925");
 
 	}
 	
 	public Graph shortestRoute(String source, String destination){
-		ArrayList<String> unsettledVertexes = new ArrayList<String>();
-		ArrayList<String> settledVertexes = new ArrayList<String>();
+		System.out.println("-------------------------------- BEGIN DIJKSTRA'S ----------------------------");
+		Set<String> unsettledVertexes = new HashSet<String>();
+		Set<String> settledVertexes = new HashSet<String>();
 		vertexMap.get(source).setDistanceFromSource(0);
-		for(int i = 0; i < vertexMap.get(source).arcList.size(); i++){
-			if(source.equals(arcMap.get(vertexMap.get(source).arcList.get(i)).getStart())){
-				vertexMap.get(arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd()).setDistanceFromSource(arcMap.get(vertexMap.get(source).arcList.get(i)).getWeight());
-				unsettledVertexes.add(arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd());
+		vertexMap.get(source).setPreviousVertex(null);
+		unsettledVertexes.add(source);
+		while(unsettledVertexes.size() > 0){
+			String workingVertex = getVertexWithLowestDistance(unsettledVertexes);
+			if(workingVertex.equals(destination)){
+				String previousVertex = vertexMap.get(workingVertex).getPreviousVertex();
+				System.out.println("ROUTE FOUND:");
+				while(previousVertex != null){
+					System.out.println("  " + vertexMap.get(previousVertex).getPreviousVertex());
+					previousVertex = vertexMap.get(previousVertex).getPreviousVertex();
+				}
+				return null;
 			}
-			else{
-				if(source.equals(arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd())){
-					vertexMap.get(arcMap.get(vertexMap.get(source).arcList.get(i)).getStart()).setDistanceFromSource(arcMap.get(vertexMap.get(source).arcList.get(i)).getWeight());
-					unsettledVertexes.add(arcMap.get(vertexMap.get(source).arcList.get(i)).getStart());
+			System.out.println("Using Vertex: " + workingVertex);
+			unsettledVertexes.remove(workingVertex);
+			settledVertexes.add(workingVertex);
+			for(int i = 0; i < vertexMap.get(workingVertex).arcList.size(); i++){ // Explore all arcs connected to the vertex
+				String arc = vertexMap.get(workingVertex).arcList.get(i);
+				System.out.println("Exploring Arc: " + arc);
+				System.out.println("  Start: " + arcMap.get(arc).getStart());
+				System.out.println("  End: " + arcMap.get(arc).getEnd());
+				if(workingVertex.equals(arcMap.get(arc).getStart()) && !settledVertexes.contains(arcMap.get(arc).getEnd())){
+					double workingDistance = arcMap.get(arc).getWeight() + vertexMap.get(workingVertex).getDistanceFromSource();
+					if(workingDistance < vertexMap.get(arcMap.get(arc).getEnd()).getDistanceFromSource()){
+						System.out.println("  Modifying End Vertex - Distance From Source = " + workingDistance);
+						vertexMap.get(arcMap.get(arc).getEnd()).setDistanceFromSource(workingDistance); // Assign working values to vertexes
+						vertexMap.get(arcMap.get(arc).getEnd()).setPreviousVertex(workingVertex);
+						unsettledVertexes.add(arcMap.get(arc).getEnd());
+					}else{
+						System.out.println("  Leaving End Vertex - Distance From Source = " + vertexMap.get(arcMap.get(arc).getEnd()).getDistanceFromSource() + ", Rejected Distance = " + workingDistance);
+					}
 				}
 				else{
-					System.out.println("Node is not end or start of arc: " + source + " is not: " + arcMap.get(vertexMap.get(source).arcList.get(i)).getStart() + ", or: " + arcMap.get(vertexMap.get(source).arcList.get(i)).getEnd());
+					if(workingVertex.equals(arcMap.get(arc).getEnd()) && !settledVertexes.contains(arcMap.get(arc).getStart())){
+						double workingDistance = arcMap.get(arc).getWeight() + vertexMap.get(workingVertex).getDistanceFromSource();
+						if(workingDistance < vertexMap.get(arcMap.get(arc).getStart()).getDistanceFromSource()){
+							System.out.println("  Modifying Start Vertex - Distance From Source = " + workingDistance);
+							vertexMap.get(arcMap.get(arc).getStart()).setDistanceFromSource(workingDistance);
+							unsettledVertexes.add(arcMap.get(arc).getStart());
+							vertexMap.get(arcMap.get(arc).getStart()).setPreviousVertex(workingVertex);
+						}else{
+							System.out.println("  Leaving Start Vertex - Distance From Source = " + vertexMap.get(arcMap.get(arc).getStart()).getDistanceFromSource() + ", Rejected Distance = " + workingDistance);
+						}
+					}
+					else{
+						System.out.println("Dead End: " + workingVertex);
+					}
 				}
+				//vertexMap.get(source).arcList.get(i)
 			}
-			//vertexMap.get(source).arcList.get(i)
 		}
-		for(int jeff = 0; jeff < unsettledVertexes.size(); jeff++){
-			System.out.println(unsettledVertexes.get(jeff));
+		for(String vertexId : unsettledVertexes){
+			System.out.println(vertexId);
 		}
 		
 		// Need two maps, visited and unvisited
 		return null;
+	}
+	
+	private String getVertexWithLowestDistance(Set<String> set){
+		Double minimum = null;
+		String minimumVertex = null;
+		for(String vertexId : set){
+			Vertex tempVertex = vertexMap.get(vertexId);
+			if(minimum == null){
+				minimum = tempVertex.getDistanceFromSource();
+				minimumVertex = tempVertex.getId();
+			}else{
+				if(tempVertex.getDistanceFromSource() < minimum){
+					minimum = tempVertex.getDistanceFromSource();
+					minimumVertex = tempVertex.getId();
+				}
+			}
+			
+		}
+		return minimumVertex;
 	}
 	
 	private void calculateWeights(){

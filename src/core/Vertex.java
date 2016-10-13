@@ -9,6 +9,7 @@ public class Vertex {
 	private double lat;
 	private double lon;
 	private double distanceFromSource = Double.MAX_VALUE;
+	private String previousVertex;
 	
 	public Vertex(String id){
 		this.setId(id);
@@ -59,6 +60,14 @@ public class Vertex {
 			return;
 		}
 		this.distanceFromSource = distanceFromSource;
+	}
+
+	public String getPreviousVertex() {
+		return previousVertex;
+	}
+
+	public void setPreviousVertex(String previousVertex) {
+		this.previousVertex = previousVertex;
 	}
 
 }
