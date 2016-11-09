@@ -8,6 +8,7 @@ import java.util.Set;
 public class Graph {
 	
 	public static final int EARTHDIAMETER = 12742;
+	public static final double KM_IN_MILE = 1.61;
 	
 	private HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>();
 	private HashMap<String,Arc> arcMap = new HashMap<String,Arc>();
@@ -23,7 +24,7 @@ public class Graph {
 				System.out.println("  " + vertexMap.get(key).arcList.get(i) + " - " + arcMap.get(vertexMap.get(key).arcList.get(i)).getWeight());
 			}
 		}
-		this.shortestRoute("268229", "2476991925");
+		this.shortestRoute("2476991925", "2062355456");
 
 	}
 	
@@ -123,7 +124,51 @@ public class Graph {
 			System.out.println("Dist: " + distance);
 			//arcMap.get(key).start
 			//arcMap.get(key).setWeight(0);
+			for(String tag : tempArc.tagList.keySet()){
+				switch(tag){
+					case "highway":
+						switch(tempArc.tagList.get("highway")){
+							case "primary":
+								
+						}
+						break;
+					case "maxspeed":
+						String maxspeedString = tempArc.tagList.get("maxspeed").trim();
+						double maxspeed = 0;
+						if(maxspeedString.length() >= 4){
+							if(maxspeedString.endsWith("mph")){
+								if(maxspeedString.contains(" ")){
+									if(maxspeedString.length() == 5){ //TODO Deal with "60mph" structure - check for space
+										maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,1));
+									}
+									else{
+										maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,2));
+									}
+								}
+								else{
+									maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,maxspeedString.length() - 3));
+								}
+							}
+							else{
+								System.out.println("Malformed maxspeed tag");
+							}
+						}else{
+							if(maxspeedString.length() > 0){
+								maxspeed = Integer.parseInt(maxspeedString);
+							}
+							else{
+								System.out.println("Malformed maxspeed tag");
+							}
+						}
+						System.out.println("  Maxspeed = " + maxspeedString);
+						System.out.println("    Maxspeed = " + maxspeed);
+						break;
+					default:
+						break;
+				}
+			}
 		}
+		
 	}
 
 }
