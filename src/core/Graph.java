@@ -87,8 +87,6 @@ public class Graph {
 		for(String vertexId : unsettledVertexes){
 			System.out.println(vertexId);
 		}
-		
-		// Need two maps, visited and unvisited
 		return null;
 	}
 	
@@ -122,53 +120,128 @@ public class Graph {
 			double distance = EARTHDIAMETER * Math.asin(Math.sqrt(temp));
 			arcMap.get(key).setWeight(distance);
 			System.out.println("Dist: " + distance);
-			//arcMap.get(key).start
-			//arcMap.get(key).setWeight(0);
-			for(String tag : tempArc.tagList.keySet()){
-				switch(tag){
-					case "highway":
-						switch(tempArc.tagList.get("highway")){
-							case "primary":
-								
-						}
-						break;
-					case "maxspeed":
-						String maxspeedString = tempArc.tagList.get("maxspeed").trim();
-						double maxspeed = 0;
-						if(maxspeedString.length() >= 4){
-							if(maxspeedString.endsWith("mph")){
-								if(maxspeedString.contains(" ")){
-									if(maxspeedString.length() == 5){ //TODO Deal with "60mph" structure - check for space
-										maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,1));
-									}
-									else{
-										maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,2));
-									}
+			System.out.println("Way Id: " + tempArc.id);
+			System.out.println("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph");
+			double weightedDistance = distance/(getMaxSpeed(tempArc)/100);
+			System.out.println("  Weighted Distance: " + weightedDistance);
+			tempArc.setWeightedDistance(weightedDistance);
+			// divide by the speed over 100
+		}
+	}
+	
+	private double getMaxSpeed(Arc arc){
+		double maxspeed = 0;
+		for(String tag : arc.tagList.keySet()){
+			switch(tag){
+				case "maxspeed":
+					String maxspeedString = arc.tagList.get("maxspeed").trim();
+					if(maxspeedString.length() >= 4){
+						if(maxspeedString.endsWith("mph")){
+							if(maxspeedString.contains(" ")){
+								if(maxspeedString.length() == 5){
+									maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,1));
+									System.out.println("Parsing " + maxspeedString + " to " + maxspeed);
+									return maxspeed;
 								}
 								else{
-									maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,maxspeedString.length() - 3));
+									maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,2));
+									System.out.println("Parsing " + maxspeedString + " to " + maxspeed);
+									return maxspeed;
 								}
 							}
 							else{
-								System.out.println("Malformed maxspeed tag");
-							}
-						}else{
-							if(maxspeedString.length() > 0){
-								maxspeed = Integer.parseInt(maxspeedString);
-							}
-							else{
-								System.out.println("Malformed maxspeed tag");
+								maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,maxspeedString.length() - 3));
+								System.out.println("Parsing " + maxspeedString + " to " + maxspeed);
+								return maxspeed;
 							}
 						}
-						System.out.println("  Maxspeed = " + maxspeedString);
-						System.out.println("    Maxspeed = " + maxspeed);
-						break;
+						else{
+							System.out.println("Malformed maxspeed tag");
+						}
+					}else{
+						if(maxspeedString.length() > 0){
+							maxspeed = Integer.parseInt(maxspeedString);
+							System.out.println("Parsing " + maxspeedString + " to " + maxspeed);
+							return maxspeed;
+						}
+						else{
+							System.out.println("Malformed maxspeed tag");
+						}
+					}
+					System.out.println("  Maxspeed = " + maxspeedString);
+					System.out.println("    Maxspeed = " + maxspeed);
+					break;
+				case "highway":
+					System.out.println(arc.tagList.get("highway"));
+					switch(arc.tagList.get("highway").trim()){
+						case "motorway":
+							maxspeed = KM_IN_MILE * 70;
+							System.out.println("Motorway, assuming: " + maxspeed);
+							return maxspeed;
+						case "trunk":
+							maxspeed = KM_IN_MILE * 70;
+							System.out.println("Trunk, assuming: " + maxspeed);
+							return maxspeed;
+						case "primary":
+							maxspeed = KM_IN_MILE * 60;
+							System.out.println("Primary, assuming: " + maxspeed);
+							return maxspeed;
+						case "secondary":
+							maxspeed = KM_IN_MILE * 50;
+							System.out.println("Secondary, assuming: " + maxspeed);
+							return maxspeed;
+						case "tertiary":
+							maxspeed = KM_IN_MILE * 40;
+							System.out.println("Tertiary, assuming: " + maxspeed);
+							return maxspeed;
+						case "unclassified":
+							maxspeed = KM_IN_MILE * 30;
+							System.out.println("Unclassified, assuming: " + maxspeed);
+							return maxspeed;
+						case "residential":
+							maxspeed = KM_IN_MILE * 30;
+							System.out.println("Residential, assuming: " + maxspeed);
+							return maxspeed;
+						case "service":
+							maxspeed = KM_IN_MILE * 10;
+							System.out.println("Service, assuming: " + maxspeed);
+							return maxspeed;
+						case "track":
+							maxspeed = KM_IN_MILE * 5;
+							System.out.println("Track, assuming: " + maxspeed);
+							return maxspeed;
+						case "motorway_link":
+							maxspeed = KM_IN_MILE * 65;
+							System.out.println("Motorway Link, assuming: " + maxspeed);
+							return maxspeed;
+						case "trunk_link":
+							maxspeed = KM_IN_MILE * 65;
+							System.out.println("Trunk Link, assuming: " + maxspeed);
+							return maxspeed;
+						case "primary_link":
+							maxspeed = KM_IN_MILE * 55;
+							System.out.println("Primary Link, assuming: " + maxspeed);
+							return maxspeed;
+						case "secondary_link":
+							maxspeed = KM_IN_MILE * 45;
+							System.out.println("Secondary Link, assuming: " + maxspeed);
+							return maxspeed;
+						case "tertiary_link":
+							maxspeed = KM_IN_MILE * 35;
+							System.out.println("Tertiary Link, assuming: " + maxspeed);
+							return maxspeed;
+						default:
+							maxspeed = KM_IN_MILE * 30;
+							System.out.println("Unknown, assuming: " + maxspeed);
+							return maxspeed;
+					}
 					default:
 						break;
-				}
 			}
 		}
-		
+		maxspeed = KM_IN_MILE * 30;
+		System.out.println("No tag info, assuming: " + maxspeed);
+		return maxspeed;
 	}
-
 }
+

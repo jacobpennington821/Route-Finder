@@ -43,4 +43,8 @@ public class Arc {
 	public void setEnd(String end) {
 		this.end = end;
 	}
+	
+	public void setWeightedDistance(double weightedDistance){
+		this.weightedDistance = weightedDistance;
+	}
 }

@@ -113,10 +113,9 @@ public class Parser {
 						System.out.println("tag line");
 						int keyIndex = line.indexOf("k=\"") + 3;
 						String key = line.substring(keyIndex,keyIndex + line.substring(keyIndex).indexOf('"'));
-						//System.out.println(key);
 						int valueIndex = line.indexOf("v=\"") + 3;
 						String value = line.substring(valueIndex,valueIndex + line.substring(valueIndex).indexOf('"'));
-						//System.out.println(value);
+						System.out.println("  " + key + ": " + value);
 						tempWay.tagList.put(key, value);
 					}else{
 						inWay = false;
