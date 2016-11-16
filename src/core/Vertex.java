@@ -9,6 +9,7 @@ public class Vertex {
 	private double lat;
 	private double lon;
 	private double distanceFromSource = Double.MAX_VALUE;
+	private double weightedDistanceFromSource = Double.MAX_VALUE;
 	private String previousVertex;
 	
 	public Vertex(String id){
@@ -60,6 +61,17 @@ public class Vertex {
 			return;
 		}
 		this.distanceFromSource = distanceFromSource;
+	}
+	
+	public double getWeightedDistanceFromSource() {
+		return weightedDistanceFromSource;
+	}
+
+	public void setWeightedDistanceFromSource(double weightedDistanceFromSource) {
+		if(weightedDistanceFromSource < 0){
+			return;
+		}
+		this.weightedDistanceFromSource = weightedDistanceFromSource;
 	}
 
 	public String getPreviousVertex() {

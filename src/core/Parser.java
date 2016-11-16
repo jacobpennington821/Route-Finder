@@ -57,20 +57,20 @@ public class Parser {
 			String line;
 			while ((line = br.readLine()) != null){
 				parse(line);
-				//System.out.println(line);
+				//Core.debug(line);
 			}
 			/*for(String key : vertexMap.keySet()){
-				System.out.println("Id: " + vertexMap.get(key).getId());
-				System.out.println("Lat: " + vertexMap.get(key).getLat() + ", Lon: " + vertexMap.get(key).getLon());
+				Core.debug("Id: " + vertexMap.get(key).getId());
+				Core.debug("Lat: " + vertexMap.get(key).getLat() + ", Lon: " + vertexMap.get(key).getLon());
 				for(int i = 0; i < vertexMap.get(key).arcList.size(); i++){
-					System.out.println("  " + vertexMap.get(key).arcList.get(i));
+					Core.debug("  " + vertexMap.get(key).arcList.get(i));
 				}
 			}*/
 		Graph map = new Graph(vertexMap, arcMap);
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			System.out.println("File Not Found");
+			Core.debug("File Not Found");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -88,9 +88,9 @@ public class Parser {
 					double lon = Double.parseDouble(line.substring(lonLocationInString,lonLocationInString + line.substring(lonLocationInString).indexOf("\"")));
 					nodeCounter++;
 					vertexMap.put(id,new Vertex(id,lat,lon));
-					//System.out.println("node" + line.substring(12, line.indexOf('"', 12)));
-					//System.out.println(lat);
-					//System.out.println(lon);
+					//Core.debug("node" + line.substring(12, line.indexOf('"', 12)));
+					//Core.debug(lat);
+					//Core.debug(lon);
 					
 				}else{
 					if(line.substring(3,7).equals("way ")){
@@ -98,24 +98,24 @@ public class Parser {
 						wayCounter++;
 						String tempId = line.substring(11, 11 + line.substring(11).indexOf("\""));
 						tempWay = new TempWay(tempId);
-						System.out.println(tempId);
+						Core.debug(tempId);
 						//find next lines
-						System.out.println("way" + wayCounter);
+						Core.debug("way" + wayCounter);
 					}
-					//System.out.println(line.substring(3, 7));
+					//Core.debug(line.substring(3, 7));
 				}
 			}else{
 				if(line.substring(5,7).equals("nd")){
-					System.out.println("node line");
+					Core.debug("node line");
 					tempWay.nodeList.add(line.substring(13, 13 + line.substring(13).indexOf('"')));
 				}else{
 					if(line.substring(5,7).equals("ta")){
-						System.out.println("tag line");
+						Core.debug("tag line");
 						int keyIndex = line.indexOf("k=\"") + 3;
 						String key = line.substring(keyIndex,keyIndex + line.substring(keyIndex).indexOf('"'));
 						int valueIndex = line.indexOf("v=\"") + 3;
 						String value = line.substring(valueIndex,valueIndex + line.substring(valueIndex).indexOf('"'));
-						System.out.println("  " + key + ": " + value);
+						Core.debug("  " + key + ": " + value);
 						tempWay.tagList.put(key, value);
 					}else{
 						inWay = false;
@@ -127,13 +127,13 @@ public class Parser {
 							arcMap.put(id, tempArc);
 							vertexMap.get(start).arcList.add(id);
 							vertexMap.get(end).arcList.add(id);
-							System.out.println(start + ", " + end + ", " + id);
+							Core.debug(start + ", " + end + ", " + id);
 							/*for(int it = 0; it < vertexMap.get(start).arcList.size(); it++){
-								System.out.println("Start arcs: " + vertexMap.get(start).arcList.get(it));
+								Core.debug("Start arcs: " + vertexMap.get(start).arcList.get(it));
 								
 							}
 							for(int it = 0; it < vertexMap.get(end).arcList.size(); it++){
-								System.out.println("End arcs: " + vertexMap.get(end).arcList.get(it));
+								Core.debug("End arcs: " + vertexMap.get(end).arcList.get(it));
 								
 							}*/
 						}

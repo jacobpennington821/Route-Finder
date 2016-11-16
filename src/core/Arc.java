@@ -10,7 +10,7 @@ public class Arc {
 	public double weight;
 	public double weightedDistance;
 	public HashMap<String,String> tagList = new HashMap<String, String>();
-	private boolean oneWay;
+	private int oneWay = 0;
 
 	
 	public Arc(String start, String end, String id, HashMap<String,String> tagList){
@@ -46,5 +46,17 @@ public class Arc {
 	
 	public void setWeightedDistance(double weightedDistance){
 		this.weightedDistance = weightedDistance;
+	}
+	
+	public double getWeightedDistance(){
+		return weightedDistance;
+	}
+
+	public int getOneWay() {
+		return oneWay;
+	}
+
+	public void setOneWay(int oneWay) {
+		this.oneWay = oneWay;
 	}
 }
