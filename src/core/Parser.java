@@ -42,42 +42,37 @@ public class Parser {
 			out = new PrintStream(new FileOutputStream("output.log"));
 			System.setOut(out);
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
 		try {
 			xmlFile = new File(path.toURI());
 		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
+	}
+	
+	public Graph parseXMLtoGraph(File XMLfile){
 		try (BufferedReader br = new BufferedReader(new FileReader(xmlFile))){
 			String line;
 			while ((line = br.readLine()) != null){
-				parse(line);
+				parseLine(line);
 				//Core.debug(line);
 			}
-			/*for(String key : vertexMap.keySet()){
-				Core.debug("Id: " + vertexMap.get(key).getId());
-				Core.debug("Lat: " + vertexMap.get(key).getLat() + ", Lon: " + vertexMap.get(key).getLon());
-				for(int i = 0; i < vertexMap.get(key).arcList.size(); i++){
-					Core.debug("  " + vertexMap.get(key).arcList.get(i));
-				}
-			}*/
-		Graph map = new Graph(vertexMap, arcMap);
 
+		Graph map = new Graph(vertexMap, arcMap);
+		return map;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			Core.debug("File Not Found");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
-	public void parse(String line){
+	public void parseLine(String line){
 		if(line.length() > 8){ // Discount any lines like </way>
 			if(!inWay){
 				if(line.substring(3, 7).equals("node")){
@@ -138,14 +133,10 @@ public class Parser {
 							}*/
 						}
 						// Construct Arcs
-						parse(line);
+						parseLine(line);
 					}
 				}
 			}
 		}
-	}
-	
-	private void constructArc(){
-		
 	}
 }

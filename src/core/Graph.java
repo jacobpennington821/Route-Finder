@@ -25,7 +25,7 @@ public class Graph {
 				Core.debug("  " + vertexMap.get(key).arcList.get(i) + " - " + arcMap.get(vertexMap.get(key).arcList.get(i)).getWeight());
 			}
 		}
-		this.shortestRoute("33071014", "33071061");
+		this.shortestRoute("2476991927", "512547");
 
 	}
 	
@@ -307,6 +307,13 @@ public class Graph {
 						case "roundabout":
 							tempArc.setOneWay(1);
 							break;
+					}
+				}
+				if(tag.equals("highway")){
+					switch(tempArc.tagList.get(tag)){
+					case "motorway":
+						tempArc.setOneWay(1);
+						break;
 					}
 				}
 			}
