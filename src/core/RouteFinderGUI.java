@@ -8,11 +8,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.*;
+import javax.swing.GroupLayout.ParallelGroup;
 
 @SuppressWarnings("serial")
 public class RouteFinderGUI extends JFrame implements ActionListener, ItemListener{
 	
 	private Parser parser;
+	private JTextField destinationInputField;
+	private JTextField originInputField;
 	
 	public RouteFinderGUI(Parser parser){
 		this.parser = parser;
@@ -34,10 +37,56 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 
 	private JComponent makeInputPanel(){
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(1,1));
+		GroupLayout layout = new GroupLayout(panel);
+		panel.setLayout(layout);
         panel.setPreferredSize(new Dimension(500, 400));
+        JLabel originInputLabel = new JLabel("Input Origin");
+        originInputField = new JTextField(20);
         JLabel destinationInputLabel = new JLabel("Input Destination");
-        JTextField destinationInputField = new JTextField(20);
+        destinationInputField = new JTextField(20);
+        JButton calculateButton = new JButton("Calculate Route");
+        calculateButton.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent event){
+    			Core.debug("Calculate Route");
+    			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){
+    				showWarning();
+    			}else{
+    				DataHandler dataHandler = new DataHandler(originInputField.getText(),destinationInputField.getText());
+    			}
+        	}
+        });
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        layout.setHorizontalGroup(layout.createSequentialGroup()
+        		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                		.addGroup(layout.createSequentialGroup()
+                				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                		.addComponent(originInputLabel)
+                                        .addComponent(destinationInputLabel)
+                                        )
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                		.addComponent(originInputField)
+                                        .addComponent(destinationInputField)
+                                        )
+                				)
+                		.addComponent(calculateButton)
+        				)
+
+
+        	);
+        layout.setVerticalGroup(layout.createSequentialGroup()
+                		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                				.addComponent(originInputLabel)
+                				.addComponent(originInputField)
+                				)
+                		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                				.addComponent(destinationInputLabel)
+                				.addComponent(destinationInputField)
+                				)
+                		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                				.addComponent(calculateButton)
+                				)
+        		);
 		return panel;
 	}
 	
@@ -80,5 +129,12 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	public void itemStateChanged(ItemEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void showWarning(){
+			JOptionPane.showMessageDialog(this,
+				    "Please complete all fields.",
+				    "Incomplete Field",
+				    JOptionPane.WARNING_MESSAGE);
 	}
 }
