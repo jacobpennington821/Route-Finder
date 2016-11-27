@@ -25,7 +25,6 @@ public class Graph {
 				Core.debug("  " + vertexMap.get(key).arcList.get(i) + " - " + arcMap.get(vertexMap.get(key).arcList.get(i)).getWeight());
 			}
 		}
-		this.shortestRoute("2476991927", "512547");
 
 	}
 	

@@ -22,7 +22,6 @@ public class Parser {
 	//ArrayList<Vertex> vertexMap = new ArrayList<Vertex>();
 	HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>();
 	HashMap<String,Arc> arcMap = new HashMap<String,Arc>();
-	ArrayList<Arc> arcTest = new ArrayList<Arc>();
 	boolean inWay = false;
 	TempWay tempWay;
 	//ArrayList<String> nodeList = new ArrayList<String>();
@@ -50,10 +49,12 @@ public class Parser {
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
 		}
+		this.parseXMLtoGraph(xmlFile);
 
 	}
 	
 	public Graph parseXMLtoGraph(File XMLfile){
+		Graph map = null;
 		try (BufferedReader br = new BufferedReader(new FileReader(xmlFile))){
 			String line;
 			while ((line = br.readLine()) != null){
@@ -61,7 +62,7 @@ public class Parser {
 				//Core.debug(line);
 			}
 
-		Graph map = new Graph(vertexMap, arcMap);
+		map = new Graph(vertexMap, arcMap);
 		return map;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -69,7 +70,7 @@ public class Parser {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return map;
 	}
 	
 	public void parseLine(String line){

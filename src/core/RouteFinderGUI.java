@@ -26,7 +26,6 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	}
 	
 	private void initComponents(){
-		
 		JTabbedPane tabPane = new JTabbedPane();
 		tabPane.addTab("Input", makeInputPanel());
 		tabPane.addTab("Text Display", makeDirectionPanel());
@@ -51,7 +50,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){
     				showWarning();
     			}else{
-    				DataHandler dataHandler = new DataHandler(originInputField.getText(),destinationInputField.getText());
+    				DataHandler dataHandler = new DataHandler(originInputField.getText(),destinationInputField.getText(), parser);
     			}
         	}
         });
@@ -132,9 +131,6 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	}
 	
 	public void showWarning(){
-			JOptionPane.showMessageDialog(this,
-				    "Please complete all fields.",
-				    "Incomplete Field",
-				    JOptionPane.WARNING_MESSAGE);
+		JOptionPane.showMessageDialog(this, "Please complete all fields.", "Incomplete Field", JOptionPane.WARNING_MESSAGE);
 	}
 }

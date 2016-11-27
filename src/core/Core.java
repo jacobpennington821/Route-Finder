@@ -28,5 +28,11 @@ public class Core {
 			System.out.println(message);
 		}
 	}
+	
+	public static void debug(StringBuilder message){
+		if(debug){
+			System.out.println(message);
+		}
+	}
 
 }
