@@ -40,9 +40,11 @@ public class Graph {
 			String workingVertex = getVertexWithLowestWeightedDistance(unsettledVertexes);
 			if(workingVertex.equals(destination)){
 				String previousVertex = vertexMap.get(workingVertex).getPreviousVertex();
+				Core.debug("  " + workingVertex);
 				Core.debug("ROUTE FOUND:");
 				while(previousVertex != null){
-					Core.debug("  " + vertexMap.get(previousVertex).getPreviousVertex());
+					Core.debug("  " + vertexMap.get(previousVertex).getPreviousVertex() + " - " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("ref") + ", " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("name"));
+					workingVertex = previousVertex;
 					previousVertex = vertexMap.get(previousVertex).getPreviousVertex();
 				}
 				return null;
@@ -317,6 +319,17 @@ public class Graph {
 				}
 			}
 		}
+	}
+	
+	private Arc getArcConnectingTwoVertexes(String node1, String node2){
+		Vertex vertex1 = vertexMap.get(node1);
+		Vertex vertex2 = vertexMap.get(node2);
+		for(int i = 0; i < vertex1.arcList.size(); i++){
+			if(arcMap.get(vertex1.arcList.get(i)).getStart().equals(node1) || arcMap.get(vertex1.arcList.get(i)).getEnd().equals(node2)){
+				return arcMap.get(vertex1.arcList.get(i));
+			}
+		}
+		return null;
 	}
 }
 

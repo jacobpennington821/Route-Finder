@@ -24,6 +24,7 @@ public class Parser {
 	HashMap<String,Arc> arcMap = new HashMap<String,Arc>();
 	boolean inWay = false;
 	TempWay tempWay;
+	Graph map;
 	//ArrayList<String> nodeList = new ArrayList<String>();
 	
 	private class TempWay{
@@ -49,7 +50,7 @@ public class Parser {
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
 		}
-		this.parseXMLtoGraph(xmlFile);
+		this.map = this.parseXMLtoGraph(xmlFile);
 
 	}
 	

@@ -18,12 +18,24 @@ public class DataHandler {
 		this.origin = origin;
 		this.destination = destination;
 		this.parser = parser;
-		this.convertNameToNodeId(this.origin);
-		this.convertNameToNodeId(this.destination);
+		this.convertInputToNodeId(this.origin);
+		this.convertInputToNodeId(this.destination);
 
 	}
 	
-	public String convertNameToNodeId(String name){
+	public DataHandler(Parser parser){
+		this.parser = parser;
+	}
+	
+	public String convertInputToNodeId(String name){
+		String nodeId = "";
+		if(isANumber(name)){
+			nodeId = name.trim();
+			if(parser.vertexMap.get(nodeId) != null){
+				return nodeId;
+			}
+			return "!presence";
+		}
 		String urlString = "http://nominatim.openstreetmap.org/search?q=" + name.replace(' ', '+') + "&format=xml&addressdetails=1";
 		URL website;
 		try {
@@ -38,21 +50,38 @@ public class DataHandler {
 			Core.debug(xmlResponse);
 			
 			if(xmlResponse.indexOf("osm_type") != -1){
-				String nodeId = null;
+				nodeId = null;
 				int osm_typeIndex = xmlResponse.indexOf("osm_type") + xmlResponse.substring(xmlResponse.indexOf("osm_type")).indexOf("'") + 1;
 				String osm_type = xmlResponse.substring(osm_typeIndex, osm_typeIndex + xmlResponse.substring(osm_typeIndex).indexOf("'"));
+				int osm_idIndex = xmlResponse.indexOf("osm_id") + 8;
 				if(osm_type.equals("way")){
-					int osm_idIndex = xmlResponse.indexOf("osm_id") + 8;
 					String wayId = xmlResponse.substring(osm_idIndex, osm_idIndex + xmlResponse.substring(osm_idIndex).indexOf("'"));
 					nodeId = convertWayIdToNodeId(wayId);
 					Core.debug("Way ID: " + wayId);
 					Core.debug("Node ID: " + nodeId);
+					if(parser.vertexMap.get(nodeId) != null){
+						return nodeId;
+					}
+					return "!presence";
 					
+				}else{
+					if(osm_type.equals("node")){
+						nodeId = xmlResponse.substring(osm_idIndex, osm_idIndex + xmlResponse.substring(osm_idIndex).indexOf("'"));
+						if(parser.vertexMap.get(nodeId) != null){
+							return nodeId;
+						}
+						return "!presence";
+					}else{
+						Core.debug("Unsupported osm_type: " + osm_type + " - returning null");
+						return null;
+					}
 				}
-				Core.debug(osm_type);
 			}
 			
 			
+		}catch(java.net.UnknownHostException e){
+			Core.debug("No Internet Connection");
+			return "!internet";
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -72,5 +101,15 @@ public class DataHandler {
 		String bestGuessNodeId = arcToRetrieve.getStart();
 		return bestGuessNodeId;
 	}
+	
+	public boolean isANumber(String str)
+	{
+	    for (char c : str.toCharArray())
+	    {
+	        if (!Character.isDigit(c)) return false;
+	    }
+	    return true;
+	}
 
 }
+

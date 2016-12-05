@@ -48,9 +48,30 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         	public void actionPerformed(ActionEvent event){
     			Core.debug("Calculate Route");
     			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){
-    				showWarning();
+    				showWarning("Please complete all fields.", "Incomplete Fields");
     			}else{
-    				DataHandler dataHandler = new DataHandler(originInputField.getText(),destinationInputField.getText(), parser);
+    				DataHandler dataHandler = new DataHandler(parser);
+    				String originResponse = dataHandler.convertInputToNodeId(originInputField.getText());
+    				if(originResponse == "!internet"){
+    					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
+    					return;
+    				}
+    				if(originResponse == "!presence" || originResponse == null){
+    					showWarning("Origin not present on current map. Please refine your search", "Node Not Present");
+    					return;
+    				}
+    				
+    				String destinationResponse = dataHandler.convertInputToNodeId(destinationInputField.getText());
+    				if(destinationResponse == "!internet"){
+    					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
+    					return;
+    				}
+    				if(destinationResponse == "!presence" || originResponse == null){
+    					showWarning("Place not present on current map. Please refine your search", "Node Not Present");
+    					return;
+    				}
+    				parser.map.shortestRoute(originResponse, destinationResponse);
+    				
     			}
         	}
         });
@@ -130,7 +151,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		
 	}
 	
-	public void showWarning(){
-		JOptionPane.showMessageDialog(this, "Please complete all fields.", "Incomplete Field", JOptionPane.WARNING_MESSAGE);
+	public void showWarning(String content, String title){
+		JOptionPane.showMessageDialog(this, content, title, JOptionPane.WARNING_MESSAGE);
 	}
 }
