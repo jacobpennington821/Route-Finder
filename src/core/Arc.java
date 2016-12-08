@@ -4,13 +4,13 @@ import java.util.HashMap;
 
 public class Arc {
 	
-	private String start;
-	private String end;
-	public String id;
-	public double weight;
-	public double weightedDistance;
-	public HashMap<String,String> tagList = new HashMap<String, String>();
-	private int oneWay = 0;
+	private String start; // A string that stores the id of the node at the start of the arc
+	private String end; // Same as above but with the end
+	public String id; // The id of the arc
+	public double weight; // The length of the arc with no weighting
+	public double weightedDistance; // The length of the arc weighted by maximum speed
+	public HashMap<String,String> tagList = new HashMap<String, String>(); // A hashmap of all the tags attributed to the arc
+	private int oneWay = 0; // If the arc is one way - 1 means one way from start to end, -1 means one way from end to start, 0 means not one way
 
 	
 	public Arc(String start, String end, String id, HashMap<String,String> tagList){
@@ -19,7 +19,9 @@ public class Arc {
 		this.id = id;
 		this.tagList = tagList;
 	}
-		
+	
+	////////////////////// GETTERS AND SETTERS //////////////////////////////////
+	
 	public double getWeight() {
 		return weight;
 	}

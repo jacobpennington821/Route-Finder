@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 public class Vertex {
 
-	public ArrayList<String> arcList;
-	private String id;
-	private double lat;
-	private double lon;
-	private double distanceFromSource = Double.MAX_VALUE;
-	private double weightedDistanceFromSource = Double.MAX_VALUE;
-	private String previousVertex;
+	public ArrayList<String> arcList; // A list of all the arcs that this vertex is a member of
+	private String id; // The id of the vertex
+	private double lat; // The latitude of the vertex
+	private double lon; // The longitude of the vertex
+	private double distanceFromSource = Double.MAX_VALUE; // Distance from source is set by default as high as possible to ensure that Dijkstra's algorithm still recognises it as a number but does not use it in a route
+	private double weightedDistanceFromSource = Double.MAX_VALUE; // Same as above but with weighted distance
+	private String previousVertex; // The id of the previous vertex in the shortest route from one vertex to another
 	
 	public Vertex(String id){
 		this.setId(id);
@@ -21,13 +21,15 @@ public class Vertex {
 		this.setId(id);
 		this.setLat(lat);
 		this.setLon(lon);
-		this.arcList = new ArrayList<String>();
+		this.arcList = new ArrayList<String>(); // Initialises the arraylist 
 	}
 	
 	public void printInfo(){
 		System.out.println("ID: " + getId() + ", lat: " + getLat() + ", lon: " + getLon());
 	}
-
+	
+	///////////////////////// GETTERS AND SETTERS ////////////////////////////////
+	
 	public String getId() {
 		return id;
 	}
@@ -57,7 +59,7 @@ public class Vertex {
 	}
 
 	public void setDistanceFromSource(double distanceFromSource) {
-		if(distanceFromSource < 0){
+		if(distanceFromSource < 0){ // Ensures that the distance cannot be lower than 0
 			return;
 		}
 		this.distanceFromSource = distanceFromSource;
@@ -68,7 +70,7 @@ public class Vertex {
 	}
 
 	public void setWeightedDistanceFromSource(double weightedDistanceFromSource) {
-		if(weightedDistanceFromSource < 0){
+		if(weightedDistanceFromSource < 0){ // Ensures that the distance cannot be lower than 0
 			return;
 		}
 		this.weightedDistanceFromSource = weightedDistanceFromSource;
