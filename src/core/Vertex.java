@@ -11,11 +11,7 @@ public class Vertex {
 	private double distanceFromSource = Double.MAX_VALUE; // Distance from source is set by default as high as possible to ensure that Dijkstra's algorithm still recognises it as a number but does not use it in a route
 	private double weightedDistanceFromSource = Double.MAX_VALUE; // Same as above but with weighted distance
 	private String previousVertex; // The id of the previous vertex in the shortest route from one vertex to another
-	
-	public Vertex(String id){
-		this.setId(id);
-		this.arcList = new ArrayList<String>();
-	}
+
 	
 	public Vertex(String id,double lat, double lon){
 		this.setId(id);

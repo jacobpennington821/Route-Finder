@@ -13,6 +13,9 @@ public class Graph {
 	private HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>(); // A hashmap that stores all vertexes using their id as a reference
 	private HashMap<String,Arc> arcMap = new HashMap<String,Arc>(); // Same as above but with arcs
 	
+	private String lastEnteredSource;
+	private String lastEnteredDestination;
+	
 	public Graph(HashMap<String,Vertex> vertexMap, HashMap<String,Arc> arcMap){
 		this.vertexMap = vertexMap;
 		this.arcMap = arcMap;
@@ -29,6 +32,8 @@ public class Graph {
 	}
 	
 	public Graph shortestRoute(String source, String destination){ // Calculates the shortest route from one vertex to another using dijkstra's algorithm - https://en.wikipedia.org/wiki/Dijkstra's_algorithm
+		lastEnteredSource = source;
+		lastEnteredDestination = destination;
 		Core.debug("-------------------------------- BEGIN DIJKSTRA'S ----------------------------");
 		Set<String> unsettledVertexes = new HashSet<String>(); // A hashset of all vertexes that have working distances from the source but are not confirmed and settled
 		Set<String> settledVertexes = new HashSet<String>(); // A hashset of all vertexes that are settled and have distances from the source
@@ -320,6 +325,22 @@ public class Graph {
 			if(arcMap.get(vertex1.arcList.get(i)).getStart().equals(vertexId2) || arcMap.get(vertex1.arcList.get(i)).getEnd().equals(vertexId2)){ // Checks if the current arc also has the second vertex as a member
 				return arcMap.get(vertex1.arcList.get(i)); // If so return that arc
 			}
+		}
+		return null;
+	}
+	
+	public String convertGraphToDirections(){
+		String workingVertex = lastEnteredDestination;
+		String previousVertex = vertexMap.get(workingVertex).getPreviousVertex();
+		ArrayList<String> reverseRoute = new ArrayList<String>();
+		while(previousVertex != null){
+			reverseRoute.add(workingVertex);
+			workingVertex = previousVertex;
+			previousVertex = vertexMap.get(previousVertex).getPreviousVertex();
+		}
+		reverseRoute.add(workingVertex);
+		for(int i = reverseRoute.size() - 1; i >= 0; i--){
+			Core.debug(reverseRoute.get(i));
 		}
 		return null;
 	}

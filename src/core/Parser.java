@@ -21,13 +21,11 @@ public class Parser {
 	File xmlFile;
 	int nodeCounter = 0;
 	int wayCounter = 0;
-	//ArrayList<Vertex> vertexMap = new ArrayList<Vertex>();
 	HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>();
 	HashMap<String,Arc> arcMap = new HashMap<String,Arc>();
 	boolean inWay = false;
 	TempWay tempWay;
 	Graph map;
-	//ArrayList<String> nodeList = new ArrayList<String>();
 	
 	private class TempWay{ // TempWay is a temporary class for use in my parser as it stores data to do with arcs.
 		String id;
@@ -41,7 +39,7 @@ public class Parser {
 	public Parser(){
 		PrintStream out;
 		try {
-			out = new PrintStream(new FileOutputStream("output.log")); // Ensures that all console output is redirect to a text file for reviewing
+			out = new PrintStream(new FileOutputStream("output.log")); // Ensures that all console output is redirected to a text file for reviewing
 			System.setOut(out);
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
@@ -87,9 +85,9 @@ public class Parser {
 					double lon = Double.parseDouble(line.substring(lonLocationInString,lonLocationInString + line.substring(lonLocationInString).indexOf("\""))); // Same as above but with longitude
 					nodeCounter++;
 					vertexMap.put(id,new Vertex(id,lat,lon)); // Add a new vertex to the hashmap of vertexes using its id as a reference, also constructs a vertex using the data extracted
-					//Core.debug("node" + line.substring(12, line.indexOf('"', 12)));
-					//Core.debug(lat);
-					//Core.debug(lon);
+					//Core.debug("node" + id);
+					//Core.debug("  " + Double.toString(lat));
+					//Core.debug("  " + Double.toString(lon));
 					
 				}else{
 					if(line.substring(3,7).equals("way ")){ // Checks if the line being parsed is a <way> line
@@ -97,24 +95,23 @@ public class Parser {
 						wayCounter++;
 						String tempId = line.substring(11, 11 + line.substring(11).indexOf("\"")); // Extracts the id of the way - always in the same place - index 11 to the first set of double quotes
 						tempWay = new TempWay(tempId); // Creates a temporary way datatype held outside the function to edit when the contents of the way are parsed in the next lines
-						Core.debug(tempId);
-						//find next lines
-						Core.debug("way" + wayCounter);
+						//Core.debug(tempId);
+						//Core.debug("way" + wayCounter);
 					}
 					//Core.debug(line.substring(3, 7));
 				}
 			}else{
 				if(line.substring(5,7).equals("nd")){ // If inside a <way> block and on a <nd> line
-					Core.debug("node line");
+					//Core.debug("node line");
 					tempWay.nodeList.add(line.substring(13, 13 + line.substring(13).indexOf('"'))); // Adds the node reference to the list of nodes stored in the temporary way
 				}else{
 					if(line.substring(5,7).equals("ta")){ // If inside a <way> block and on a <tag> line
-						Core.debug("tag line");
+						//Core.debug("tag line");
 						int keyIndex = line.indexOf("k=\"") + 3; // Find the location in the string of k=" which indicates the start of the tag key
 						String key = line.substring(keyIndex,keyIndex + line.substring(keyIndex).indexOf('"')); // Extracts the tag key from the keyIndex to the next set of double quotes
 						int valueIndex = line.indexOf("v=\"") + 3; // Find the location in the string of v=" which indicates the start of the tag value
 						String value = line.substring(valueIndex,valueIndex + line.substring(valueIndex).indexOf('"')); // Extracts the tag value from the valueIndex to the next set of double quotes
-						Core.debug("  " + key + ": " + value);
+						//Core.debug("  " + key + ": " + value);
 						tempWay.tagList.put(key, value); // Add the key value pair to the hashmap of tags
 					}else{
 						inWay = false; // If in a <way> block and encounters a line not recognised - assumed to be quitting out of the <way> block - updates boolean flag accordingly
@@ -126,15 +123,7 @@ public class Parser {
 							arcMap.put(id, tempArc); // Adds the new arc to the hashmap of arcs
 							vertexMap.get(start).arcList.add(id); // Updates the vertexes that are contained in each arc, giving them the ids of all arcs they are included in
 							vertexMap.get(end).arcList.add(id);
-							Core.debug(start + ", " + end + ", " + id);
-							/*for(int it = 0; it < vertexMap.get(start).arcList.size(); it++){
-								Core.debug("Start arcs: " + vertexMap.get(start).arcList.get(it));
-								
-							}
-							for(int it = 0; it < vertexMap.get(end).arcList.size(); it++){
-								Core.debug("End arcs: " + vertexMap.get(end).arcList.get(it));
-								
-							}*/
+							//Core.debug(start + ", " + end + ", " + id);
 						}
 						// Construct Arcs
 						parseLine(line); // Calls itself with the new perspective that it is not in a <way> block, and so makes sure no important information such as a new <way> block or a <node> was missed

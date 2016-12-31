@@ -33,5 +33,11 @@ public class Core {
 			System.out.println(message);
 		}
 	}
+	
+	public static void debug(int message){
+		if(debug){
+			System.out.println(message);
+		}
+	}
 
 }

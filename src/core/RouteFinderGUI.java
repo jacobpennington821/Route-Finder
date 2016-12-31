@@ -16,9 +16,13 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	private Parser parser;
 	private JTextField destinationInputField;
 	private JTextField originInputField;
+	private JTabbedPane tabPane;
+	DataHandler dataHandler;
+
 	
 	public RouteFinderGUI(Parser parser){
 		this.parser = parser;
+		this.dataHandler = new DataHandler(parser);
 		this.setTitle("Route Finder");
 		initComponents();
 		this.pack();
@@ -26,7 +30,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	}
 	
 	private void initComponents(){
-		JTabbedPane tabPane = new JTabbedPane();
+		tabPane = new JTabbedPane();
 		tabPane.addTab("Input", makeInputPanel());
 		tabPane.addTab("Text Display", makeDirectionPanel());
 		tabPane.addTab("Map Display", makeMapPanel());
@@ -50,7 +54,6 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){
     				showWarning("Please complete all fields.", "Incomplete Fields");
     			}else{
-    				DataHandler dataHandler = new DataHandler(parser);
     				String originResponse = dataHandler.convertInputToNodeId(originInputField.getText());
     				if(originResponse == "!internet"){
     					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
@@ -71,7 +74,8 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     					return;
     				}
     				parser.map.shortestRoute(originResponse, destinationResponse);
-    				
+    				tabPane.setSelectedIndex(1);
+    				parser.map.convertGraphToDirections();
     			}
         	}
         });
@@ -112,8 +116,12 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	
 	private JComponent makeDirectionPanel(){
 		JPanel panel = new JPanel();
+		JTextArea outputBox = new JTextArea();
+		outputBox.setEditable(false);
+		//TODO Convert graph to directions - method call goes here
+		outputBox.append("Directions go here");
 		JLabel label = new JLabel("Directions");
-		panel.add(label);
+		panel.add(outputBox);
 		panel.setLayout(new GridLayout(1,1));
 		panel.setPreferredSize(new Dimension(500,400));
 		return panel;
