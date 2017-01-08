@@ -21,13 +21,6 @@ public class Graph {
 		this.arcMap = arcMap;
 		this.calculateWeights(); // Calculates all arc weights on the graph
 		this.calculateNonTraversableArcs(); // Calculates whether any arcs on the graph are one way and if so in which direction
-		for(String key : vertexMap.keySet()){
-			Core.debug("Id: " + vertexMap.get(key).getId());
-			Core.debug("  Lat: " + vertexMap.get(key).getLat() + ", Lon: " + vertexMap.get(key).getLon());
-			for(int i = 0; i < vertexMap.get(key).arcList.size(); i++){
-				Core.debug("  " + vertexMap.get(key).arcList.get(i) + " - " + arcMap.get(vertexMap.get(key).arcList.get(i)).getWeight());
-			}
-		}
 
 	}
 	
@@ -164,11 +157,11 @@ public class Graph {
 			double temp = Math.pow(Math.sin((lat2 - lat1) / 2), 2) + (Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)); // A temporary value for use in the distance calculation
 			double distance = EARTHDIAMETER * Math.asin(Math.sqrt(temp)); // Using the haversine formula to calculate the length of arcs using latitudes and longitudes - https://en.wikipedia.org/wiki/Haversine_formula 
 			tempArc.setWeight(distance); // Assigns unweighted distance to the arc being used
-			Core.debug("Way Id: " + tempArc.id);
-			Core.debug("  Dist: " + distance);
-			Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph");
+			//Core.debug("Way Id: " + tempArc.id);
+			//Core.debug("  Dist: " + distance);
+			//Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph");
 			double weightedDistance = distance/(getMaxSpeed(tempArc)/100); // Calculates weighted distance of road by dividing distance by the maximum speed of the road over 100
-			Core.debug("  Weighted Distance: " + weightedDistance);
+			//Core.debug("  Weighted Distance: " + weightedDistance);
 			tempArc.setWeightedDistance(weightedDistance); // Assigns the weighted distance to the arc being used
 			// divide by the speed over 100
 		}
@@ -184,12 +177,12 @@ public class Graph {
 						if(maxspeedString.endsWith("mph")){ // If maxspeed is measured in mph
 							if(maxspeedString.contains(" ")){ // Differentiates between "30 mph" and "30mph"
 								maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,maxspeedString.indexOf(" "))); // Extracts values such as 5 from "5 mph" and then converts them to km/hr
-								Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
+								//Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
 								return maxspeed;
 							}
 							else{
 								maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,maxspeedString.length() - 3)); // Extracts values such as 5 from "5mph" and then converts them to km/hr
-								Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
+								//Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
 								return maxspeed;
 							}
 						}
@@ -199,78 +192,78 @@ public class Graph {
 					}else{ // If string does not contain "mph" then it is measured in km/hr
 						if(maxspeedString.length() > 0){ // Ensuring string is not empty
 							maxspeed = Integer.parseInt(maxspeedString); // No substring needed as the string should just be a number - No conversion required either as value is already in km/hr
-							Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
+							//Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
 							return maxspeed;
 						}
 						else{
 							Core.debug("Malformed maxspeed tag");
 						}
 					}
-					Core.debug("  Maxspeed = " + maxspeedString);
-					Core.debug("    Maxspeed = " + maxspeed);
+					//Core.debug("  Maxspeed = " + maxspeedString);
+					//Core.debug("    Maxspeed = " + maxspeed);
 					break;
 				case "highway": // If maxspeed tag is not present then the "highway" tag will be used instead
-					Core.debug(arc.tagList.get("highway"));
+					//Core.debug(arc.tagList.get("highway"));
 					switch(arc.tagList.get("highway").trim()){ // Switches based on "highway" value
 						case "motorway":
 							maxspeed = KM_IN_MILE * 70; // If the road is a motorway the speed limit in the UK is 70 mph
-							Core.debug("Motorway, assuming: " + maxspeed);
+							//Core.debug("Motorway, assuming: " + maxspeed);
 							return maxspeed;
 						case "trunk":
 							maxspeed = KM_IN_MILE * 70; // Roads tagged with "trunk" are usually dual carriageway so 70 mph is assumed
-							Core.debug("Trunk, assuming: " + maxspeed);
+							//Core.debug("Trunk, assuming: " + maxspeed);
 							return maxspeed;
 						case "primary": // Roads tagged with primary tend to be A roads and similar so 60 mph is assumed
 							maxspeed = KM_IN_MILE * 60;
-							Core.debug("Primary, assuming: " + maxspeed);
+							//Core.debug("Primary, assuming: " + maxspeed);
 							return maxspeed;
 						case "secondary": // Roads tagged with secondary tend to be roads slightly smaller than an A road and so 50 mph is assumed as a safe halfway point
 							maxspeed = KM_IN_MILE * 50;
-							Core.debug("Secondary, assuming: " + maxspeed);
+							//Core.debug("Secondary, assuming: " + maxspeed);
 							return maxspeed;
 						case "tertiary": // Roads tagged with tertiary tend to be small and narrow, so while the speed limit may be 60 mph it is not achievable, therefore 40 mph is assumed
 							maxspeed = KM_IN_MILE * 40;
-							Core.debug("Tertiary, assuming: " + maxspeed);
+							//Core.debug("Tertiary, assuming: " + maxspeed);
 							return maxspeed;
 						case "unclassified": // Roads tagged with "unclassified" may be farm tracks or similar so 30 mph is assumed
 							maxspeed = KM_IN_MILE * 30;
-							Core.debug("Unclassified, assuming: " + maxspeed);
+							//Core.debug("Unclassified, assuming: " + maxspeed);
 							return maxspeed;
 						case "residential": // Roads that are residential are usually 30 mph speed limits
 							maxspeed = KM_IN_MILE * 30;
-							Core.debug("Residential, assuming: " + maxspeed);
+							//Core.debug("Residential, assuming: " + maxspeed);
 							return maxspeed;
 						case "service": // Service roads are usually private roads and very poorly maintained so 10 mph is assumed
 							maxspeed = KM_IN_MILE * 10;
-							Core.debug("Service, assuming: " + maxspeed);
+							//Core.debug("Service, assuming: " + maxspeed);
 							return maxspeed;
 						case "track": // Tracks are farm tracks or worse so only 5 mph is assumed
 							maxspeed = KM_IN_MILE * 5;
-							Core.debug("Track, assuming: " + maxspeed);
+							//Core.debug("Track, assuming: " + maxspeed);
 							return maxspeed;
 						case "motorway_link": // Motorway_link roads are usually slip roads or similar so 65 mph is assumed
 							maxspeed = KM_IN_MILE * 65;
-							Core.debug("Motorway Link, assuming: " + maxspeed);
+							//Core.debug("Motorway Link, assuming: " + maxspeed);
 							return maxspeed;
 						case "trunk_link": // Trunk_link are roads such as slip ways onto dual carriageways so 65 mph assumed
 							maxspeed = KM_IN_MILE * 65;
-							Core.debug("Trunk Link, assuming: " + maxspeed);
+							//Core.debug("Trunk Link, assuming: " + maxspeed);
 							return maxspeed;
 						case "primary_link": // Primary_link roads are smaller than primary roads but larger than secondary so 55 mph is assumed
 							maxspeed = KM_IN_MILE * 55;
-							Core.debug("Primary Link, assuming: " + maxspeed);
+							//Core.debug("Primary Link, assuming: " + maxspeed);
 							return maxspeed;
 						case "secondary_link": // Seccondary_link roads are smaller than secondary but larger than tertiary so 45 mph is assumed
 							maxspeed = KM_IN_MILE * 45;
-							Core.debug("Secondary Link, assuming: " + maxspeed);
+							//Core.debug("Secondary Link, assuming: " + maxspeed);
 							return maxspeed;
 						case "tertiary_link": // Tertiary_link roads are smaller than tertiary but larger than tracks or service roads so 35 mph is assumed
 							maxspeed = KM_IN_MILE * 35;
-							Core.debug("Tertiary Link, assuming: " + maxspeed);
+							//Core.debug("Tertiary Link, assuming: " + maxspeed);
 							return maxspeed;
 						default: // If highway tag is malformed then 30 mph is assumed
 							maxspeed = KM_IN_MILE * 30; 
-							Core.debug("Unknown, assuming: " + maxspeed);
+							//Core.debug("Unknown, assuming: " + maxspeed);
 							return maxspeed;
 					}
 					default:
@@ -290,11 +283,11 @@ public class Graph {
 					switch(tempArc.tagList.get(tag)){ // Gets the value of the "oneway" tag
 						case "yes":
 							tempArc.setOneWay(1); // Assign the road to be one way
-							Core.debug("One way");
+							//Core.debug("One way");
 							break;
 						case "-1":
 							tempArc.setOneWay(-1); // Assign the road to be one way in reverse
-							Core.debug("Reverse One Way");
+							//Core.debug("Reverse One Way");
 							break;
 						default: // If oneway does not equal yes or -1 then the road is not one way
 							break;
@@ -330,6 +323,7 @@ public class Graph {
 	}
 	
 	public String convertGraphToDirections(){
+		StringBuilder output = new StringBuilder();
 		String workingVertex = lastEnteredDestination;
 		String previousVertex = vertexMap.get(workingVertex).getPreviousVertex();
 		ArrayList<String> reverseRoute = new ArrayList<String>();
@@ -339,10 +333,44 @@ public class Graph {
 			previousVertex = vertexMap.get(previousVertex).getPreviousVertex();
 		}
 		reverseRoute.add(workingVertex);
+		Arc currentArc;
+		String currentRoadRef = "!novalue";
+		String currentRoadName;
 		for(int i = reverseRoute.size() - 1; i >= 0; i--){
-			Core.debug(reverseRoute.get(i));
+			if(i != 0){
+				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
+				//Core.debug(currentRoadRef);
+				//Core.debug(currentArc.tagList.get("ref"));
+				if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
+					if(currentRoadRef != currentArc.tagList.get("ref")){
+						currentRoadRef = currentArc.tagList.get("ref");
+						currentRoadName = currentArc.tagList.get("name");
+						if(currentRoadRef == null){
+							if(currentRoadName == null){
+								Core.debug("Unnamed Road");
+								output.append("Unnamed Road\n");
+							} else {
+								Core.debug(currentRoadName);
+								output.append(currentRoadName + "\n");
+							}
+						} else {
+							Core.debug(currentRoadRef);
+							output.append(currentRoadRef + "\n");
+						}
+					}
+				} else {
+					if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
+						currentRoadRef = currentArc.tagList.get("ref");
+						currentRoadName = currentArc.tagList.get("name");
+						Core.debug(currentRoadRef);
+						output.append(currentRoadRef + "\n");
+					}
+				}
+				//Core.debug(reverseRoute.get(i) + " - " + reverseRoute.get(i-1) + " --> " + currentArc.tagList.get("ref") + ", " + currentArc.tagList.get("name"));
+			}
+			//Core.debug(reverseRoute.get(i));
 		}
-		return null;
+		return output.toString();
 	}
 }
 

@@ -18,6 +18,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	private JTextField originInputField;
 	private JTabbedPane tabPane;
 	DataHandler dataHandler;
+	private JTextArea outputBox;
 
 	
 	public RouteFinderGUI(Parser parser){
@@ -75,7 +76,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     				}
     				parser.map.shortestRoute(originResponse, destinationResponse);
     				tabPane.setSelectedIndex(1);
-    				parser.map.convertGraphToDirections();
+    				outputBox.append(parser.map.convertGraphToDirections());
     			}
         	}
         });
@@ -116,10 +117,10 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	
 	private JComponent makeDirectionPanel(){
 		JPanel panel = new JPanel();
-		JTextArea outputBox = new JTextArea();
+		outputBox = new JTextArea();
 		outputBox.setEditable(false);
 		//TODO Convert graph to directions - method call goes here
-		outputBox.append("Directions go here");
+		//outputBox.append("Directions go here");
 		JLabel label = new JLabel("Directions");
 		panel.add(outputBox);
 		panel.setLayout(new GridLayout(1,1));
