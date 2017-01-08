@@ -335,7 +335,7 @@ public class Graph {
 		reverseRoute.add(workingVertex);
 		Arc currentArc;
 		String currentRoadRef = "!novalue";
-		String currentRoadName;
+		String currentRoadName = "!novalue";
 		for(int i = reverseRoute.size() - 1; i >= 0; i--){
 			if(i != 0){
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
@@ -357,6 +357,25 @@ public class Graph {
 							Core.debug(currentRoadRef);
 							output.append(currentRoadRef + "\n");
 						}
+					} else {
+						if(currentArc.tagList.get("name") == null || currentRoadName == null){
+							if(currentRoadName != currentArc.tagList.get("name")){
+								currentRoadName = currentArc.tagList.get("name");
+								if(currentRoadName == null){
+									Core.debug("Unnamed Road");
+									output.append("Unnamed Road\n");
+								} else {
+									Core.debug(currentRoadName);
+									output.append(currentRoadName + "\n");
+								}
+							}
+						} else {
+							if(!currentRoadName.equals(currentArc.tagList.get("name"))){
+								currentRoadName = currentArc.tagList.get("name");
+								Core.debug(currentRoadName);
+								output.append(currentRoadName + "\n");
+							}
+						}
 					}
 				} else {
 					if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
@@ -370,7 +389,38 @@ public class Graph {
 			}
 			//Core.debug(reverseRoute.get(i));
 		}
+		Core.debug(Double.toString(Math.toDegrees(calculateBearing("889481513","639176291"))));	
+		Core.debug(Double.toString(Math.toDegrees(calculateBearing("760497360","889481507"))));
+		Core.debug(calculateDirection("268400801", "268400800", "1601699917"));
+		Core.debug(calculateDirection("700339642", "700339643", "291947797"));
 		return output.toString();
+	}
+	
+	private double calculateBearing(String vertexId1, String vertexId2){
+		Vertex vertex1 = vertexMap.get(vertexId1);
+		Vertex vertex2 = vertexMap.get(vertexId2);
+		double lat1 = Math.toRadians(vertex1.getLat());
+		double lon1 = Math.toRadians(vertex1.getLon());
+		double lat2 = Math.toRadians(vertex2.getLat());
+		double lon2 = Math.toRadians(vertex2.getLon());
+		double temp1 = Math.cos(lat2) * Math.sin(lon2 - lon1);
+		double temp2 = (Math.cos(lat1) * Math.sin(lat2)) - (Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1));
+		double bearing = Math.atan2(temp1, temp2);
+		if(bearing < 0){
+			bearing += 2 * Math.PI;
+		}
+		return bearing;
+	}
+	
+	private String calculateDirection(String vertexId1, String vertexId2, String vertexId3){
+		double directionValue = calculateBearing(vertexId1,vertexId2) - calculateBearing(vertexId2,vertexId3);
+		if((-Math.PI < directionValue && directionValue < 0) || (Math.PI < directionValue && directionValue < 2 * Math.PI)){
+			return "right";
+		}
+		if((0 < directionValue && directionValue < Math.PI) || (-2 * Math.PI < directionValue && directionValue < -Math.PI)){
+			return "left";
+		}
+		return "Invalid";
 	}
 }
 
