@@ -70,8 +70,8 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
     					return;
     				}
-    				if(destinationResponse == "!presence" || originResponse == null){
-    					showWarning("Place not present on current map. Please refine your search", "Node Not Present");
+    				if(destinationResponse == "!presence" || destinationResponse == null){
+    					showWarning("Destination not present on current map. Please refine your search", "Node Not Present");
     					return;
     				}
     				parser.map.shortestRoute(originResponse, destinationResponse);
