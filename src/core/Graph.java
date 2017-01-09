@@ -1,5 +1,7 @@
 package core;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -336,6 +338,7 @@ public class Graph {
 		Arc currentArc;
 		String currentRoadRef = "!novalue";
 		String currentRoadName = "!novalue";
+		double previousDirectionDistance = 0;
 		for(int i = reverseRoute.size() - 1; i >= 0; i--){
 			if(i != 0){
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
@@ -343,6 +346,11 @@ public class Graph {
 				//Core.debug(currentArc.tagList.get("ref"));
 				if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
 					if(currentRoadRef != currentArc.tagList.get("ref")){
+						output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+						if(i != reverseRoute.size() - 1){
+							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+						}
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
 						if(currentRoadRef == null){
@@ -360,6 +368,11 @@ public class Graph {
 					} else {
 						if(currentArc.tagList.get("name") == null || currentRoadName == null){
 							if(currentRoadName != currentArc.tagList.get("name")){
+								output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+								previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+								if(i != reverseRoute.size() - 1){
+									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+								}
 								currentRoadName = currentArc.tagList.get("name");
 								if(currentRoadName == null){
 									Core.debug("Unnamed Road");
@@ -371,6 +384,11 @@ public class Graph {
 							}
 						} else {
 							if(!currentRoadName.equals(currentArc.tagList.get("name"))){
+								output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+								previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+								if(i != reverseRoute.size() - 1){
+									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+								}
 								currentRoadName = currentArc.tagList.get("name");
 								Core.debug(currentRoadName);
 								output.append(currentRoadName + "\n");
@@ -379,6 +397,11 @@ public class Graph {
 					}
 				} else {
 					if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
+						output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+						if(i != reverseRoute.size() - 1){
+							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+						}
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
 						Core.debug(currentRoadRef);
@@ -412,6 +435,23 @@ public class Graph {
 		return bearing;
 	}
 	
+	private String getBearingString(String vertexId1, String vertexId2){
+		double bearing = calculateBearing(vertexId1, vertexId2);
+		if((7/4) * Math.PI <= bearing && bearing <= 2 * Math.PI || bearing <= 0 && bearing < (1/4) * Math.PI){
+			return "north";
+		}
+		if((1/4) * Math.PI <= bearing && bearing < (3/4) * Math.PI){
+			return "east";
+		}
+		if((3/4) * Math.PI <= bearing && bearing < (5/4) * Math.PI){
+			return "south";
+		}
+		if((5/4) * Math.PI <= bearing && bearing < (7/4) * Math.PI){
+			return "west";
+		}
+		return null;
+	}
+	
 	private String calculateDirection(String vertexId1, String vertexId2, String vertexId3){
 		double directionValue = calculateBearing(vertexId1,vertexId2) - calculateBearing(vertexId2,vertexId3);
 		if((-Math.PI < directionValue && directionValue < 0) || (Math.PI < directionValue && directionValue < 2 * Math.PI)){
@@ -422,5 +462,12 @@ public class Graph {
 		}
 		return "Invalid";
 	}
-}
 
+	public static double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+	
+	    BigDecimal bd = new BigDecimal(value);
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
+	}
+}
