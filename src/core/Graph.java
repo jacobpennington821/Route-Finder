@@ -346,7 +346,7 @@ public class Graph {
 				//Core.debug(currentArc.tagList.get("ref"));
 				if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
 					if(currentRoadRef != currentArc.tagList.get("ref")){
-						output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+						output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 						if(i != reverseRoute.size() - 1){
 							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
@@ -368,7 +368,7 @@ public class Graph {
 					} else {
 						if(currentArc.tagList.get("name") == null || currentRoadName == null){
 							if(currentRoadName != currentArc.tagList.get("name")){
-								output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+								output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 								previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 								if(i != reverseRoute.size() - 1){
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
@@ -384,7 +384,7 @@ public class Graph {
 							}
 						} else {
 							if(!currentRoadName.equals(currentArc.tagList.get("name"))){
-								output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+								output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 								previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 								if(i != reverseRoute.size() - 1){
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
@@ -397,7 +397,7 @@ public class Graph {
 					}
 				} else {
 					if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
-						output.append("After " + (vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance) + " km, ");
+						output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 						if(i != reverseRoute.size() - 1){
 							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");

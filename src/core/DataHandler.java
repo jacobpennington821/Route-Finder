@@ -99,7 +99,7 @@ public class DataHandler { // The data handler receives input from the GUI and p
 		Arc arcToRetrieve = arcMap.get(parsedWayId); // Gets the arc by the way id
 		String bestGuessNodeId;
 		if(arcToRetrieve != null){ // Ensures that the arc is present on the arc hashmap
-			bestGuessNodeId = arcToRetrieve.getStart(); // Gets the first node in the arc
+			bestGuessNodeId = arcToRetrieve.getEnd(); // Gets the last node in the arc
 		}
 		else{
 			bestGuessNodeId = null; // Just returns null if the arc is not present

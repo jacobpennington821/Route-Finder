@@ -119,10 +119,11 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		JPanel panel = new JPanel();
 		outputBox = new JTextArea();
 		outputBox.setEditable(false);
+		JScrollPane scroll = new JScrollPane(outputBox);
 		//TODO Convert graph to directions - method call goes here
 		//outputBox.append("Directions go here");
 		JLabel label = new JLabel("Directions");
-		panel.add(outputBox);
+		panel.add(scroll);
 		panel.setLayout(new GridLayout(1,1));
 		panel.setPreferredSize(new Dimension(500,400));
 		return panel;
