@@ -342,14 +342,21 @@ public class Graph {
 		for(int i = reverseRoute.size() - 1; i >= 0; i--){
 			if(i != 0){
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
+				/*if(currentArc.tagList.get("junction") != null){
+					if(currentArc.tagList.get("junction").equals("roundabout")){
+						
+					}
+				}*/
 				//Core.debug(currentRoadRef);
 				//Core.debug(currentArc.tagList.get("ref"));
 				if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
 					if(currentRoadRef != currentArc.tagList.get("ref")){
-						output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 						if(i != reverseRoute.size() - 1){
+							output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+							previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+						}else{
+							output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
 						}
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
@@ -368,10 +375,12 @@ public class Graph {
 					} else {
 						if(currentArc.tagList.get("name") == null || currentRoadName == null){
 							if(currentRoadName != currentArc.tagList.get("name")){
-								output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-								previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 								if(i != reverseRoute.size() - 1){
+									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+								}else{
+									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
 								}
 								currentRoadName = currentArc.tagList.get("name");
 								if(currentRoadName == null){
@@ -384,10 +393,12 @@ public class Graph {
 							}
 						} else {
 							if(!currentRoadName.equals(currentArc.tagList.get("name"))){
-								output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-								previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 								if(i != reverseRoute.size() - 1){
+									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+								}else{
+									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
 								}
 								currentRoadName = currentArc.tagList.get("name");
 								Core.debug(currentRoadName);
@@ -397,10 +408,12 @@ public class Graph {
 					}
 				} else {
 					if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
-						output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 						if(i != reverseRoute.size() - 1){
+							output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+							previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
 							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+						}else{
+							output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
 						}
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
@@ -412,10 +425,8 @@ public class Graph {
 			}
 			//Core.debug(reverseRoute.get(i));
 		}
-		Core.debug(Double.toString(Math.toDegrees(calculateBearing("889481513","639176291"))));	
-		Core.debug(Double.toString(Math.toDegrees(calculateBearing("760497360","889481507"))));
-		Core.debug(calculateDirection("268400801", "268400800", "1601699917"));
-		Core.debug(calculateDirection("700339642", "700339643", "291947797"));
+		Core.debug(getExitOnRoundabout("1687317961","1687317956"));
+
 		return output.toString();
 	}
 	
@@ -449,7 +460,7 @@ public class Graph {
 		if((5/4) * Math.PI <= bearing && bearing < (7/4) * Math.PI){
 			return "west";
 		}
-		return null;
+		return "invalid";
 	}
 	
 	private String calculateDirection(String vertexId1, String vertexId2, String vertexId3){
@@ -469,5 +480,72 @@ public class Graph {
 	    BigDecimal bd = new BigDecimal(value);
 	    bd = bd.setScale(places, RoundingMode.HALF_UP);
 	    return bd.doubleValue();
+	}
+	
+	private int getExitOnRoundabout(String startingVertex, String exitVertex){
+		String currentVertex = startingVertex;
+		boolean found = false;
+		int exits = 0;
+		String nextVertex = "";
+		do{
+			for(int i = 0; i < vertexMap.get(currentVertex).arcList.size(); i++){
+				String currentArc = vertexMap.get(currentVertex).arcList.get(i);
+				Core.debug("Inspecting: " + currentArc);
+				if(arcMap.get(currentArc).tagList.get("junction") != null){
+					if(!arcMap.get(currentArc).tagList.get("junction").equals("roundabout")){
+						if(arcMap.get(currentArc).getStart().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != -1){
+							Core.debug(currentArc + " is an exit");
+							exits++;
+							if(arcMap.get(currentArc).getEnd().equals(exitVertex)){
+								return exits;
+							}
+						}
+						if(arcMap.get(currentArc).getEnd().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != 1){
+							Core.debug(currentArc + " is an exit");
+							exits++;
+							if(arcMap.get(currentArc).getStart().equals(exitVertex)){
+								return exits;
+							}
+						}
+					}else{
+						if(arcMap.get(currentArc).getStart().equals(currentVertex)){
+							nextVertex = arcMap.get(currentArc).getEnd();
+							Core.debug("Discovered next vertex: " + nextVertex);
+						}						
+						
+					}
+				}else{
+					if(arcMap.get(currentArc).getStart().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != -1){
+						Core.debug(currentArc + " is an exit");
+						exits++;
+						if(arcMap.get(currentArc).getEnd().equals(exitVertex)){
+							return exits;
+						}
+					}
+					if(arcMap.get(currentArc).getEnd().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != 1){
+						Core.debug(currentArc + " is an exit");
+						exits++;
+						if(arcMap.get(currentArc).getStart().equals(exitVertex)){
+							return exits;
+						}
+					}
+				}
+			}
+			currentVertex = nextVertex;
+		}while(!currentVertex.equals(startingVertex) || !found);
+		return exits;
+	}
+	
+	private String formatNumberToPlace(int number){
+		switch(number){
+		case 1:
+			return number + "st";
+		case 2:
+			return number + "nd";
+		case 3:
+			return number + "rd";
+		default:
+			return number + "th";
+		}
 	}
 }
