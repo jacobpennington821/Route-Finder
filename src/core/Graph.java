@@ -325,6 +325,8 @@ public class Graph {
 	}
 	
 	public String convertGraphToDirections(){
+		Core.debug(getExitOnRoundabout("1687317961","1687317956"));
+		Core.debug(getExitOnRoundabout("33071014", "2062355376"));
 		StringBuilder output = new StringBuilder();
 		String workingVertex = lastEnteredDestination;
 		String previousVertex = vertexMap.get(workingVertex).getPreviousVertex();
@@ -338,94 +340,115 @@ public class Graph {
 		Arc currentArc;
 		String currentRoadRef = "!novalue";
 		String currentRoadName = "!novalue";
+		boolean inRoundabout = false;
+		String roundaboutEntry = "";
 		double previousDirectionDistance = 0;
 		for(int i = reverseRoute.size() - 1; i >= 0; i--){
 			if(i != 0){
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
-				/*if(currentArc.tagList.get("junction") != null){
-					if(currentArc.tagList.get("junction").equals("roundabout")){
-						
-					}
-				}*/
-				//Core.debug(currentRoadRef);
-				//Core.debug(currentArc.tagList.get("ref"));
-				if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
-					if(currentRoadRef != currentArc.tagList.get("ref")){
-						if(i != reverseRoute.size() - 1){
-							output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-							previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
-							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-						}else{
-							output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+				if(!inRoundabout){
+					if(currentArc.tagList.get("junction") == null){
+						if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
+							if(currentRoadRef != currentArc.tagList.get("ref")){
+								if(i != reverseRoute.size() - 1){
+									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+								}else{
+									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+								}
+								currentRoadRef = currentArc.tagList.get("ref");
+								currentRoadName = currentArc.tagList.get("name");
+								if(currentRoadRef == null){
+									if(currentRoadName == null){
+										Core.debug("Unnamed Road");
+										output.append("Unnamed Road\n");
+									} else {
+										Core.debug(currentRoadName);
+										output.append(currentRoadName + "\n");
+									}
+								} else {
+									Core.debug(currentRoadRef);
+									output.append(currentRoadRef + "\n");
+								}
+							} else {
+								if(currentArc.tagList.get("name") == null || currentRoadName == null){
+									if(currentRoadName != currentArc.tagList.get("name")){
+										if(i != reverseRoute.size() - 1){
+											output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+											previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+										}else{
+											output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+										}
+										currentRoadName = currentArc.tagList.get("name");
+										if(currentRoadName == null){
+											Core.debug("Unnamed Road");
+											output.append("Unnamed Road\n");
+										} else {
+											Core.debug(currentRoadName);
+											output.append(currentRoadName + "\n");
+										}
+									}
+								} else {
+									if(!currentRoadName.equals(currentArc.tagList.get("name"))){
+										if(i != reverseRoute.size() - 1){
+											output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+											previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+										}else{
+											output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+										}
+										currentRoadName = currentArc.tagList.get("name");
+										Core.debug(currentRoadName);
+										output.append(currentRoadName + "\n");
+									}
+								}
+							}
+						} else {
+							if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
+								if(i != reverseRoute.size() - 1){
+									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+								}else{
+									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+								}
+								currentRoadRef = currentArc.tagList.get("ref");
+								currentRoadName = currentArc.tagList.get("name");
+								Core.debug(currentRoadRef);
+								output.append(currentRoadRef + "\n");
+							}
 						}
+					} else {
+						if(currentArc.tagList.get("junction").equals("roundabout")){
+							inRoundabout = true;
+							roundaboutEntry = reverseRoute.get(i-1);
+						}
+					}
+				} else {
+					if(currentArc.tagList.get("junction") == null){
+						inRoundabout = false;
+						output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+						output.append("take the " + formatNumberToPlace(getExitOnRoundabout(roundaboutEntry,reverseRoute.get(i-1))) + " exit on the roundabout, onto ");
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
 						if(currentRoadRef == null){
 							if(currentRoadName == null){
-								Core.debug("Unnamed Road");
 								output.append("Unnamed Road\n");
-							} else {
-								Core.debug(currentRoadName);
+							} else{
 								output.append(currentRoadName + "\n");
 							}
 						} else {
-							Core.debug(currentRoadRef);
 							output.append(currentRoadRef + "\n");
 						}
-					} else {
-						if(currentArc.tagList.get("name") == null || currentRoadName == null){
-							if(currentRoadName != currentArc.tagList.get("name")){
-								if(i != reverseRoute.size() - 1){
-									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
-									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-								}else{
-									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-								}
-								currentRoadName = currentArc.tagList.get("name");
-								if(currentRoadName == null){
-									Core.debug("Unnamed Road");
-									output.append("Unnamed Road\n");
-								} else {
-									Core.debug(currentRoadName);
-									output.append(currentRoadName + "\n");
-								}
-							}
-						} else {
-							if(!currentRoadName.equals(currentArc.tagList.get("name"))){
-								if(i != reverseRoute.size() - 1){
-									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
-									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-								}else{
-									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-								}
-								currentRoadName = currentArc.tagList.get("name");
-								Core.debug(currentRoadName);
-								output.append(currentRoadName + "\n");
-							}
-						}
-					}
-				} else {
-					if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
-						if(i != reverseRoute.size() - 1){
-							output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-							previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
-							output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-						}else{
-							output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-						}
-						currentRoadRef = currentArc.tagList.get("ref");
-						currentRoadName = currentArc.tagList.get("name");
-						Core.debug(currentRoadRef);
-						output.append(currentRoadRef + "\n");
 					}
 				}
 				//Core.debug(reverseRoute.get(i) + " - " + reverseRoute.get(i-1) + " --> " + currentArc.tagList.get("ref") + ", " + currentArc.tagList.get("name"));
 			}
 			//Core.debug(reverseRoute.get(i));
 		}
-		Core.debug(getExitOnRoundabout("1687317961","1687317956"));
 
 		return output.toString();
 	}
@@ -448,16 +471,16 @@ public class Graph {
 	
 	private String getBearingString(String vertexId1, String vertexId2){
 		double bearing = calculateBearing(vertexId1, vertexId2);
-		if((7/4) * Math.PI <= bearing && bearing <= 2 * Math.PI || bearing <= 0 && bearing < (1/4) * Math.PI){
+		if(((7 * Math.PI) / 4 <= bearing && bearing <= 2 * Math.PI )|| (bearing <= 0 && bearing < (Math.PI / 4))){
 			return "north";
 		}
-		if((1/4) * Math.PI <= bearing && bearing < (3/4) * Math.PI){
+		if(Math.PI / 4 <= bearing && bearing < (3 * Math.PI) / 4){
 			return "east";
 		}
-		if((3/4) * Math.PI <= bearing && bearing < (5/4) * Math.PI){
+		if((3 * Math.PI) / 4 <= bearing && bearing < (5 * Math.PI) / 4){
 			return "south";
 		}
-		if((5/4) * Math.PI <= bearing && bearing < (7/4) * Math.PI){
+		if((5 * Math.PI) / 4 <= bearing && bearing < (7 * Math.PI) / 4){
 			return "west";
 		}
 		return "invalid";
@@ -483,6 +506,7 @@ public class Graph {
 	}
 	
 	private int getExitOnRoundabout(String startingVertex, String exitVertex){
+		Core.debug("Start: " + startingVertex + ", End: " + exitVertex);
 		String currentVertex = startingVertex;
 		boolean found = false;
 		int exits = 0;
@@ -490,7 +514,7 @@ public class Graph {
 		do{
 			for(int i = 0; i < vertexMap.get(currentVertex).arcList.size(); i++){
 				String currentArc = vertexMap.get(currentVertex).arcList.get(i);
-				Core.debug("Inspecting: " + currentArc);
+				Core.debug("Inspecting: " + currentArc + ", on " + currentVertex);
 				if(arcMap.get(currentArc).tagList.get("junction") != null){
 					if(!arcMap.get(currentArc).tagList.get("junction").equals("roundabout")){
 						if(arcMap.get(currentArc).getStart().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != -1){

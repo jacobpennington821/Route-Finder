@@ -51,6 +51,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         JButton calculateButton = new JButton("Calculate Route");
         calculateButton.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent event){
+        		outputBox.setText("");
     			Core.debug("Calculate Route");
     			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){
     				showWarning("Please complete all fields.", "Incomplete Fields");
