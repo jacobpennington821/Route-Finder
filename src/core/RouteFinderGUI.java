@@ -4,6 +4,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -132,6 +135,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		c.weightx = 1;
 		c.weighty = 1;
 		c.gridheight = 2;
+		c.gridwidth = 2;
 		panel.add(scroll, c);
 		JButton printButton = new JButton("Print");
 		printButton.addActionListener(new ActionListener(){
@@ -149,6 +153,21 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		c.gridy = 2;
 		c.fill = GridBagConstraints.NONE;
 		panel.add(printButton, c);
+		JButton copyToClipboardButton = new JButton("Copy To Clipboard");
+		copyToClipboardButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent event){
+				String text = outputBox.getText();
+				StringSelection stringSelection = new StringSelection(text);
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clipboard.setContents(stringSelection, null);
+			}
+		});
+		c = new GridBagConstraints();
+		c.gridheight = 1;
+		c.gridx = 1;
+		c.gridy = 2;
+		c.fill = GridBagConstraints.NONE;
+		panel.add(copyToClipboardButton, c);
 		//panel.setPreferredSize(new Dimension(500,400));
 		return panel;
 	}
