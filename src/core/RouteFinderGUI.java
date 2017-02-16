@@ -1,11 +1,14 @@
 package core;
 
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.print.PrinterException;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -118,15 +121,35 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	
 	private JComponent makeDirectionPanel(){
 		JPanel panel = new JPanel();
+		panel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
 		outputBox = new JTextArea();
 		outputBox.setEditable(false);
 		JScrollPane scroll = new JScrollPane(outputBox);
-		//TODO Convert graph to directions - method call goes here
-		//outputBox.append("Directions go here");
-		JLabel label = new JLabel("Directions");
-		panel.add(scroll);
-		panel.setLayout(new GridLayout(1,1));
-		panel.setPreferredSize(new Dimension(500,400));
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1;
+		c.weighty = 1;
+		c.gridheight = 2;
+		panel.add(scroll, c);
+		JButton printButton = new JButton("Print");
+		printButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent event){
+				try {
+					outputBox.print();
+				} catch (PrinterException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		c = new GridBagConstraints();
+		c.gridheight = 1;
+		c.gridx = 0;
+		c.gridy = 2;
+		c.fill = GridBagConstraints.NONE;
+		panel.add(printButton, c);
+		//panel.setPreferredSize(new Dimension(500,400));
 		return panel;
 	}
 	
