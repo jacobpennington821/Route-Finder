@@ -150,22 +150,22 @@ public class Graph {
 	}
 	
 	private void calculateWeights(){
+		double lat1,lon1,lat2,lon2,temp,distance,weightedDistance;
 		for(String key : arcMap.keySet()){ // Iterates through every arc in the arc hashmap
 			Arc tempArc = arcMap.get(key);
-			double lat1 = Math.toRadians(vertexMap.get(tempArc.getStart()).getLat());
-			double lon1 = Math.toRadians(vertexMap.get(tempArc.getStart()).getLon());
-			double lat2 = Math.toRadians(vertexMap.get(tempArc.getEnd()).getLat());
-			double lon2 = Math.toRadians(vertexMap.get(tempArc.getEnd()).getLon());
-			double temp = Math.pow(Math.sin((lat2 - lat1) / 2), 2) + (Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)); // A temporary value for use in the distance calculation
-			double distance = EARTHDIAMETER * Math.asin(Math.sqrt(temp)); // Using the haversine formula to calculate the length of arcs using latitudes and longitudes - https://en.wikipedia.org/wiki/Haversine_formula 
+			lat1 = Math.toRadians(vertexMap.get(tempArc.getStart()).getLat());
+			lon1 = Math.toRadians(vertexMap.get(tempArc.getStart()).getLon());
+			lat2 = Math.toRadians(vertexMap.get(tempArc.getEnd()).getLat());
+			lon2 = Math.toRadians(vertexMap.get(tempArc.getEnd()).getLon());
+			temp = Math.pow(Math.sin((lat2 - lat1) / 2), 2) + (Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)); // A temporary value for use in the distance calculation
+			distance = EARTHDIAMETER * Math.asin(Math.sqrt(temp)); // Using the haversine formula to calculate the length of arcs using latitudes and longitudes - https://en.wikipedia.org/wiki/Haversine_formula 
 			tempArc.setWeight(distance); // Assigns unweighted distance to the arc being used
-			//Core.debug("Way Id: " + tempArc.id);
-			//Core.debug("  Dist: " + distance);
-			//Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph");
-			double weightedDistance = distance/(getMaxSpeed(tempArc)/100); // Calculates weighted distance of road by dividing distance by the maximum speed of the road over 100
-			//Core.debug("  Weighted Distance: " + weightedDistance);
-			tempArc.setWeightedDistance(weightedDistance); // Assigns the weighted distance to the arc being used
-			// divide by the speed over 100
+			Core.debug("Way Id: " + tempArc.id);
+			Core.debug("  Dist: " + distance);
+			//Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph"); 
+			weightedDistance = distance/(getMaxSpeed(tempArc)/100); // Calculates weighted distance of road by dividing distance by the maximum speed of the road over 100 
+			//Core.debug("  Weighted Distance: " + weightedDistance); 
+			tempArc.setWeightedDistance(weightedDistance); // Assigns the weighted distance to the arc being used 
 		}
 	}
 	
