@@ -11,6 +11,7 @@ public class Graph {
 	
 	public static final int EARTHDIAMETER = 12742;
 	public static final double KM_IN_MILE = 1.61;
+	public static final double MAXSPEEDDAMPENING = 0.75;
 	
 	private HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>(); // A hashmap that stores all vertexes using their id as a reference
 	private HashMap<String,Arc> arcMap = new HashMap<String,Arc>(); // Same as above but with arcs
@@ -149,7 +150,7 @@ public class Graph {
 		return minimumVertex;
 	}
 	
-	private void calculateWeights(){
+	private void calculateWeights(){ // Assigns distances and times to each arc in km and hours respectively
 		double lat1,lon1,lat2,lon2,temp,distance,weightedDistance;
 		for(String key : arcMap.keySet()){ // Iterates through every arc in the arc hashmap
 			Arc tempArc = arcMap.get(key);
@@ -163,7 +164,7 @@ public class Graph {
 			Core.debug("Way Id: " + tempArc.id);
 			Core.debug("  Dist: " + distance);
 			//Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph"); 
-			weightedDistance = distance/(getMaxSpeed(tempArc)/100); // Calculates weighted distance of road by dividing distance by the maximum speed of the road over 100 
+			weightedDistance = distance/(getMaxSpeed(tempArc)); // Calculates weighted distance of road by dividing distance by the maximum speed of the road over 100 
 			//Core.debug("  Weighted Distance: " + weightedDistance); 
 			tempArc.setWeightedDistance(weightedDistance); // Assigns the weighted distance to the arc being used 
 		}
@@ -180,12 +181,12 @@ public class Graph {
 							if(maxspeedString.contains(" ")){ // Differentiates between "30 mph" and "30mph"
 								maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,maxspeedString.indexOf(" "))); // Extracts values such as 5 from "5 mph" and then converts them to km/hr
 								//Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
-								return maxspeed;
+								return maxspeed * MAXSPEEDDAMPENING;
 							}
 							else{
 								maxspeed = KM_IN_MILE * Integer.parseInt(maxspeedString.substring(0,maxspeedString.length() - 3)); // Extracts values such as 5 from "5mph" and then converts them to km/hr
 								//Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
-								return maxspeed;
+								return maxspeed * MAXSPEEDDAMPENING;
 							}
 						}
 						else{
@@ -195,7 +196,7 @@ public class Graph {
 						if(maxspeedString.length() > 0){ // Ensuring string is not empty
 							maxspeed = Integer.parseInt(maxspeedString); // No substring needed as the string should just be a number - No conversion required either as value is already in km/hr
 							//Core.debug("Parsing " + maxspeedString + " to " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						}
 						else{
 							Core.debug("Malformed maxspeed tag");
@@ -210,63 +211,63 @@ public class Graph {
 						case "motorway":
 							maxspeed = KM_IN_MILE * 70; // If the road is a motorway the speed limit in the UK is 70 mph
 							//Core.debug("Motorway, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "trunk":
 							maxspeed = KM_IN_MILE * 70; // Roads tagged with "trunk" are usually dual carriageway so 70 mph is assumed
 							//Core.debug("Trunk, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "primary": // Roads tagged with primary tend to be A roads and similar so 60 mph is assumed
 							maxspeed = KM_IN_MILE * 60;
 							//Core.debug("Primary, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "secondary": // Roads tagged with secondary tend to be roads slightly smaller than an A road and so 50 mph is assumed as a safe halfway point
 							maxspeed = KM_IN_MILE * 50;
 							//Core.debug("Secondary, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "tertiary": // Roads tagged with tertiary tend to be small and narrow, so while the speed limit may be 60 mph it is not achievable, therefore 40 mph is assumed
 							maxspeed = KM_IN_MILE * 40;
 							//Core.debug("Tertiary, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "unclassified": // Roads tagged with "unclassified" may be farm tracks or similar so 30 mph is assumed
 							maxspeed = KM_IN_MILE * 30;
 							//Core.debug("Unclassified, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "residential": // Roads that are residential are usually 30 mph speed limits
 							maxspeed = KM_IN_MILE * 30;
 							//Core.debug("Residential, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "service": // Service roads are usually private roads and very poorly maintained so 10 mph is assumed
 							maxspeed = KM_IN_MILE * 10;
 							//Core.debug("Service, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "track": // Tracks are farm tracks or worse so only 5 mph is assumed
 							maxspeed = KM_IN_MILE * 5;
 							//Core.debug("Track, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "motorway_link": // Motorway_link roads are usually slip roads or similar so 65 mph is assumed
 							maxspeed = KM_IN_MILE * 65;
 							//Core.debug("Motorway Link, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "trunk_link": // Trunk_link are roads such as slip ways onto dual carriageways so 65 mph assumed
 							maxspeed = KM_IN_MILE * 65;
 							//Core.debug("Trunk Link, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "primary_link": // Primary_link roads are smaller than primary roads but larger than secondary so 55 mph is assumed
 							maxspeed = KM_IN_MILE * 55;
 							//Core.debug("Primary Link, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "secondary_link": // Seccondary_link roads are smaller than secondary but larger than tertiary so 45 mph is assumed
 							maxspeed = KM_IN_MILE * 45;
 							//Core.debug("Secondary Link, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						case "tertiary_link": // Tertiary_link roads are smaller than tertiary but larger than tracks or service roads so 35 mph is assumed
 							maxspeed = KM_IN_MILE * 35;
 							//Core.debug("Tertiary Link, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 						default: // If highway tag is malformed then 30 mph is assumed
 							maxspeed = KM_IN_MILE * 30; 
 							//Core.debug("Unknown, assuming: " + maxspeed);
-							return maxspeed;
+							return maxspeed * MAXSPEEDDAMPENING;
 					}
 					default:
 						break;
@@ -274,7 +275,7 @@ public class Graph {
 		}
 		maxspeed = KM_IN_MILE * 30; // If no tags are present at all then 30 mph is assumed
 		Core.debug("No tag info, assuming: " + maxspeed);
-		return maxspeed;
+		return maxspeed * MAXSPEEDDAMPENING;
 	}
 	
 	private void calculateNonTraversableArcs(){
@@ -449,7 +450,7 @@ public class Graph {
 			}
 			//Core.debug(reverseRoute.get(i));
 		}
-
+		output.append("Time = " + vertexMap.get(reverseRoute.get(0)).getWeightedDistanceFromSource());
 		return output.toString();
 	}
 	

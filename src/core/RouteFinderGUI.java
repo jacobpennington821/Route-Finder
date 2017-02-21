@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
 
 import javax.swing.*;
@@ -43,6 +45,11 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		tabPane.addTab("Map Display", makeMapPanel());
 		this.add(tabPane);
 		this.setJMenuBar(constructMenuBar());
+		this.addWindowListener(new WindowAdapter() {
+			public void windowOpened(WindowEvent e){
+				originInputField.requestFocusInWindow();
+			}
+		});
 	}
 
 	private JComponent makeInputPanel(){
