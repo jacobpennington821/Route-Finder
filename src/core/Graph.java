@@ -164,7 +164,7 @@ public class Graph {
 			Core.debug("Way Id: " + tempArc.id);
 			Core.debug("  Dist: " + distance);
 			//Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph"); 
-			weightedDistance = distance/(getMaxSpeed(tempArc)); // Calculates weighted distance of road by dividing distance by the maximum speed of the road over 100 
+			weightedDistance = distance/(getMaxSpeed(tempArc)); // Calculates weighted distance which is equal to time in hours of road by dividing distance by the average speed
 			//Core.debug("  Weighted Distance: " + weightedDistance); 
 			tempArc.setWeightedDistance(weightedDistance); // Assigns the weighted distance to the arc being used 
 		}

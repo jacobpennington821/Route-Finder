@@ -21,55 +21,55 @@ import javax.swing.GroupLayout.ParallelGroup;
 @SuppressWarnings("serial")
 public class RouteFinderGUI extends JFrame implements ActionListener, ItemListener{
 	
-	private Parser parser;
-	private JTextField destinationInputField;
-	private JTextField originInputField;
-	private JTabbedPane tabPane;
-	DataHandler dataHandler;
-	private JTextArea outputBox;
+	private Parser parser;                   //->
+	private JTextField destinationInputField;//-->
+	private JTextField originInputField;     //---> Variables and fields that need to be accessed from multiple functions
+	private JTabbedPane tabPane;             //---> 
+	DataHandler dataHandler;                 //-->
+	private JTextArea outputBox;             //->
 
 	
-	public RouteFinderGUI(Parser parser){
+	public RouteFinderGUI(Parser parser){ // GUI requires the parser being created before being constructed itself - byproduct of single threading means parser needs to parse map before showing UI
 		this.parser = parser;
-		this.dataHandler = new DataHandler(parser);
+		this.dataHandler = new DataHandler(parser); // Datahandler deals with manipulating inputs to return values that can be used in the core program
 		this.setTitle("Route Finder");
-		initComponents();
-		this.pack();
+		initComponents(); // Creates UI components
+		this.pack(); // Compresses the window down to make sure there's no extra blank space to the bottom or side of the window
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
 	private void initComponents(){
-		tabPane = new JTabbedPane();
+		tabPane = new JTabbedPane(); // Creates the main tabs
 		tabPane.addTab("Input", makeInputPanel());
 		tabPane.addTab("Text Display", makeDirectionPanel());
-		tabPane.addTab("Map Display", makeMapPanel());
-		this.add(tabPane);
+		//tabPane.addTab("Map Display", makeMapPanel());
+		this.add(tabPane); // Adds the tabbed pane to the JFrame
 		this.setJMenuBar(constructMenuBar());
 		this.addWindowListener(new WindowAdapter() {
 			public void windowOpened(WindowEvent e){
-				originInputField.requestFocusInWindow();
+				originInputField.requestFocusInWindow(); // Ensures that when the window is loaded the first text entry field has the focus
 			}
 		});
 	}
 
 	private JComponent makeInputPanel(){
-		JPanel panel = new JPanel();
-		GroupLayout layout = new GroupLayout(panel);
-		panel.setLayout(layout);
-        panel.setPreferredSize(new Dimension(500, 400));
+		JPanel panel = new JPanel(); // Creates a panel to add everything to
+		GroupLayout layout = new GroupLayout(panel); 
+		panel.setLayout(layout); // Assigns the layout format of the panel as GroupLayout
+        panel.setPreferredSize(new Dimension(500, 400)); // 500 x 400 pixels
         JLabel originInputLabel = new JLabel("Input Origin");
-        originInputField = new JTextField(20);
+        originInputField = new JTextField(20); // Creates a text field of 20 columns
         JLabel destinationInputLabel = new JLabel("Input Destination");
         destinationInputField = new JTextField(20);
         JButton calculateButton = new JButton("Calculate Route");
-        calculateButton.addActionListener(new ActionListener() {
+        calculateButton.addActionListener(new ActionListener() { // Creates the method for what to do when the "calculate" button is pressed
         	public void actionPerformed(ActionEvent event){
-        		outputBox.setText("");
+        		outputBox.setText(""); // Clears the output box
     			Core.debug("Calculate Route");
-    			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){
+    			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){ // Checks if text present in both fields
     				showWarning("Please complete all fields.", "Incomplete Fields");
     			}else{
-    				String originResponse = dataHandler.convertInputToNodeId(originInputField.getText());
+    				String originResponse = dataHandler.convertInputToNodeId(originInputField.getText()); // Sends the origin text to the data handler for processing
     				if(originResponse == "!internet"){
     					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
     					return;
@@ -79,7 +79,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     					return;
     				}
     				
-    				String destinationResponse = dataHandler.convertInputToNodeId(destinationInputField.getText());
+    				String destinationResponse = dataHandler.convertInputToNodeId(destinationInputField.getText()); // Sends the destination text to the data handler
     				if(destinationResponse == "!internet"){
     					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
     					return;
@@ -88,15 +88,15 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     					showWarning("Destination not present on current map. Please refine your search", "Node Not Present");
     					return;
     				}
-    				parser.map.shortestRoute(originResponse, destinationResponse);
-    				tabPane.setSelectedIndex(1);
-    				outputBox.append(parser.map.convertGraphToDirections());
+    				parser.map.shortestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
+    				tabPane.setSelectedIndex(1); // Changes the tab to the output tab
+    				outputBox.append(parser.map.convertGraphToDirections()); // Adds the directions to the output tab
     			}
         	}
         });
-        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateGaps(true); // Makes sure everything is spaced nicely
         layout.setAutoCreateContainerGaps(true);
-        layout.setHorizontalGroup(layout.createSequentialGroup()
+        layout.setHorizontalGroup(layout.createSequentialGroup() // Horizontal group deals with the layout of things in order from left to right (x axis)
         		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 		.addGroup(layout.createSequentialGroup()
                 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -113,7 +113,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 
 
         	);
-        layout.setVerticalGroup(layout.createSequentialGroup()
+        layout.setVerticalGroup(layout.createSequentialGroup() // Vertical group deals with the layout of things from top to bottom (y axis)
                 		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 				.addComponent(originInputLabel)
                 				.addComponent(originInputField)
@@ -129,13 +129,13 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		return panel;
 	}
 	
-	private JComponent makeDirectionPanel(){
+	private JComponent makeDirectionPanel(){ // Creates the output panel
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridBagLayout());
+		panel.setLayout(new GridBagLayout()); // Assigns the layout to GridBagLayout
 		GridBagConstraints c = new GridBagConstraints();
 		outputBox = new JTextArea();
 		outputBox.setEditable(false);
-		JScrollPane scroll = new JScrollPane(outputBox);
+		JScrollPane scroll = new JScrollPane(outputBox); // Makes the output box scrollable
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.BOTH;
@@ -143,38 +143,38 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		c.weighty = 1;
 		c.gridheight = 2;
 		c.gridwidth = 2;
-		panel.add(scroll, c);
-		JButton printButton = new JButton("Print");
+		panel.add(scroll, c); // Adds the box to the UI with the same constraints as above
+		JButton printButton = new JButton("Print"); // Creates the print button
 		printButton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent event){
+			public void actionPerformed(ActionEvent event){ // Event that is triggered when the print button is pressed
 				try {
-					outputBox.print();
+					outputBox.print(); // Calls the Java method to print the text contained in the box
 				} catch (PrinterException e) {
 					e.printStackTrace();
 				}
 			}
 		});
-		c = new GridBagConstraints();
+		c = new GridBagConstraints(); // Resets the constraints to prevent overlapping variables
 		c.gridheight = 1;
 		c.gridx = 0;
 		c.gridy = 2;
 		c.fill = GridBagConstraints.NONE;
-		panel.add(printButton, c);
-		JButton copyToClipboardButton = new JButton("Copy To Clipboard");
+		panel.add(printButton, c); // Adds the print button to the UI with the constraints above
+		JButton copyToClipboardButton = new JButton("Copy To Clipboard"); // Creates the copy to clipboard button
 		copyToClipboardButton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent event){
-				String text = outputBox.getText();
-				StringSelection stringSelection = new StringSelection(text);
-				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clipboard.setContents(stringSelection, null);
+			public void actionPerformed(ActionEvent event){ // Event that is triggered when the copy to clipboard button is pressed
+				String text = outputBox.getText(); // Retrives the text in the box
+				StringSelection stringSelection = new StringSelection(text); 
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard(); // Gets the system clipboard
+				clipboard.setContents(stringSelection, null); // Adds the string to the clipboard
 			}
 		});
-		c = new GridBagConstraints();
+		c = new GridBagConstraints(); // Resets the constraints again
 		c.gridheight = 1;
 		c.gridx = 1;
 		c.gridy = 2;
 		c.fill = GridBagConstraints.NONE;
-		panel.add(copyToClipboardButton, c);
+		panel.add(copyToClipboardButton, c); // Adds the coppy to clipboard button to the UI
 		//panel.setPreferredSize(new Dimension(500,400));
 		return panel;
 	}
@@ -211,7 +211,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		
 	}
 	
-	public void showWarning(String content, String title){
+	public void showWarning(String content, String title){ // Creates a warning message with the passed text
 		JOptionPane.showMessageDialog(this, content, title, JOptionPane.WARNING_MESSAGE);
 	}
 }
