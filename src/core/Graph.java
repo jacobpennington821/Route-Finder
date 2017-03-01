@@ -15,6 +15,8 @@ public class Graph {
 	
 	private HashMap<String,Vertex> vertexMap = new HashMap<String,Vertex>(); // A hashmap that stores all vertexes using their id as a reference
 	private HashMap<String,Arc> arcMap = new HashMap<String,Arc>(); // Same as above but with arcs
+	HashMap<String,Vertex> vertexMapMirror;
+	HashMap<String,Arc> arcMapMirror;
 	
 	private String lastEnteredSource;
 	private String lastEnteredDestination;
@@ -28,74 +30,76 @@ public class Graph {
 	}
 	
 	public Graph shortestRoute(String source, String destination){ // Calculates the shortest route from one vertex to another using dijkstra's algorithm - https://en.wikipedia.org/wiki/Dijkstra's_algorithm
+		vertexMapMirror = new HashMap<String,Vertex>(vertexMap);
+		arcMapMirror = new HashMap<String,Arc>(arcMap);
 		lastEnteredSource = source;
 		lastEnteredDestination = destination;
 		Core.debug("-------------------------------- BEGIN DIJKSTRA'S ----------------------------");
 		Set<String> unsettledVertexes = new HashSet<String>(); // A hashset of all vertexes that have working distances from the source but are not confirmed and settled
 		Set<String> settledVertexes = new HashSet<String>(); // A hashset of all vertexes that are settled and have distances from the source
-		vertexMap.get(source).setWeightedDistanceFromSource(0); // Starts by setting all distance values for the source node to 0
-		vertexMap.get(source).setDistanceFromSource(0);
-		vertexMap.get(source).setPreviousVertex(null); // Assigns the previous vertex of the source to null
+		vertexMapMirror.get(source).setWeightedDistanceFromSource(0); // Starts by setting all distance values for the source node to 0
+		vertexMapMirror.get(source).setDistanceFromSource(0);
+		vertexMapMirror.get(source).setPreviousVertex(null); // Assigns the previous vertex of the source to null
 		unsettledVertexes.add(source); // The source node is added to the list of unsettled vertexes
 		while(unsettledVertexes.size() > 0){ // Loop until no vertexes are unsettled
 			String workingVertex = getVertexWithLowestWeightedDistance(unsettledVertexes); // The current working vertex is assigned to the vertex in the unsettled vertex hashset with the shortest distance from any currently settled vertex
 			if(workingVertex.equals(destination)){
-				String previousVertex = vertexMap.get(workingVertex).getPreviousVertex();
+				String previousVertex = vertexMapMirror.get(workingVertex).getPreviousVertex();
 				Core.debug("  " + workingVertex);
 				Core.debug("ROUTE FOUND:");
 				while(previousVertex != null){
-					Core.debug("  " + vertexMap.get(previousVertex).getPreviousVertex() + " - " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("ref") + ", " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("name"));
+					Core.debug("  " + vertexMapMirror.get(previousVertex).getPreviousVertex() + " - " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("ref") + ", " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("name"));
 					workingVertex = previousVertex;
-					previousVertex = vertexMap.get(previousVertex).getPreviousVertex();
+					previousVertex = vertexMapMirror.get(previousVertex).getPreviousVertex();
 				}
 				return null;
 			}
 			Core.debug("Using Vertex: " + workingVertex);
 			unsettledVertexes.remove(workingVertex); // Transfers the current vertex from the unsettled hashset to the settled hashset
 			settledVertexes.add(workingVertex);
-			for(int i = 0; i < vertexMap.get(workingVertex).arcList.size(); i++){ // Explore all arcs connected to the vertex
-				String arc = vertexMap.get(workingVertex).arcList.get(i); // Temporarily stores the current arc being used
+			for(int i = 0; i < vertexMapMirror.get(workingVertex).arcList.size(); i++){ // Explore all arcs connected to the vertex
+				String arc = vertexMapMirror.get(workingVertex).arcList.get(i); // Temporarily stores the current arc being used
 				Core.debug("Exploring Arc: " + arc);
-				Core.debug("  Start: " + arcMap.get(arc).getStart());
-				Core.debug("  End: " + arcMap.get(arc).getEnd());
-				if(workingVertex.equals(arcMap.get(arc).getStart()) && !settledVertexes.contains(arcMap.get(arc).getEnd())){ // Checking for the orientation of the arc being used: either start to end or end to start
+				Core.debug("  Start: " + arcMapMirror.get(arc).getStart());
+				Core.debug("  End: " + arcMapMirror.get(arc).getEnd());
+				if(workingVertex.equals(arcMapMirror.get(arc).getStart()) && !settledVertexes.contains(arcMapMirror.get(arc).getEnd())){ // Checking for the orientation of the arc being used: either start to end or end to start
 					// Section for dealing with arcs from start to end
-					if(arcMap.get(arc).getOneWay() == -1){ // Discards arc if the arc has the "oneway" tag set to -1 - can't be travelled down from start to end
+					if(arcMapMirror.get(arc).getOneWay() == -1){ // Discards arc if the arc has the "oneway" tag set to -1 - can't be travelled down from start to end
 						Core.debug("Ignoring Arc, Reverse One Way Road");
 					}else{
-						double workingDistance = arcMap.get(arc).getWeight() + vertexMap.get(workingVertex).getDistanceFromSource(); // Sets the working distance to the current vertex's distance from the source + the weight of the arc
-						double workingWeightedDistance = arcMap.get(arc).getWeightedDistance() + vertexMap.get(workingVertex).getWeightedDistanceFromSource(); // Same as above but using weighted distance instead
-						if(workingWeightedDistance < vertexMap.get(arcMap.get(arc).getEnd()).getWeightedDistanceFromSource()){ // If the working weighted distance is less than the target vertexes current weighted distance
+						double workingDistance = arcMapMirror.get(arc).getWeight() + vertexMapMirror.get(workingVertex).getDistanceFromSource(); // Sets the working distance to the current vertex's distance from the source + the weight of the arc
+						double workingWeightedDistance = arcMapMirror.get(arc).getWeightedDistance() + vertexMapMirror.get(workingVertex).getWeightedDistanceFromSource(); // Same as above but using weighted distance instead
+						if(workingWeightedDistance < vertexMapMirror.get(arcMapMirror.get(arc).getEnd()).getWeightedDistanceFromSource()){ // If the working weighted distance is less than the target vertexes current weighted distance
 							Core.debug("  Modifying End Vertex - Distance From Source = " + workingDistance);
 							Core.debug("  Modifying End Vertex - Weighted Distance From Source = " + workingWeightedDistance);
-							vertexMap.get(arcMap.get(arc).getEnd()).setDistanceFromSource(workingDistance);
-							vertexMap.get(arcMap.get(arc).getEnd()).setWeightedDistanceFromSource(workingWeightedDistance);// Assign working distances to target vertex
-							vertexMap.get(arcMap.get(arc).getEnd()).setPreviousVertex(workingVertex); // Assigns the current vertex as the target vertex's previous vertex
-							unsettledVertexes.add(arcMap.get(arc).getEnd()); // If the target vertex is not present in the unsettled vertexes hashset then it is added - hashset doesn't accept duplicates
+							vertexMapMirror.get(arcMapMirror.get(arc).getEnd()).setDistanceFromSource(workingDistance);
+							vertexMapMirror.get(arcMapMirror.get(arc).getEnd()).setWeightedDistanceFromSource(workingWeightedDistance);// Assign working distances to target vertex
+							vertexMapMirror.get(arcMapMirror.get(arc).getEnd()).setPreviousVertex(workingVertex); // Assigns the current vertex as the target vertex's previous vertex
+							unsettledVertexes.add(arcMapMirror.get(arc).getEnd()); // If the target vertex is not present in the unsettled vertexes hashset then it is added - hashset doesn't accept duplicates
 						}else{ // Ignore target vertex if the route to it is longer than its current distance from source
-							Core.debug("  Leaving End Vertex - Distance From Source = " + vertexMap.get(arcMap.get(arc).getEnd()).getDistanceFromSource() + ", Rejected Distance = " + workingDistance);
-							Core.debug("  Leaving End Vertex - Weighted Distance From Source = " + vertexMap.get(arcMap.get(arc).getEnd()).getWeightedDistanceFromSource() + ", Rejected Weighted Distance = " + workingWeightedDistance);
+							Core.debug("  Leaving End Vertex - Distance From Source = " + vertexMapMirror.get(arcMapMirror.get(arc).getEnd()).getDistanceFromSource() + ", Rejected Distance = " + workingDistance);
+							Core.debug("  Leaving End Vertex - Weighted Distance From Source = " + vertexMapMirror.get(arcMapMirror.get(arc).getEnd()).getWeightedDistanceFromSource() + ", Rejected Weighted Distance = " + workingWeightedDistance);
 						}
 					}
 				}
 				else{
-					if(workingVertex.equals(arcMap.get(arc).getEnd()) && !settledVertexes.contains(arcMap.get(arc).getStart())){ // Checking for the orientation of the arc
+					if(workingVertex.equals(arcMapMirror.get(arc).getEnd()) && !settledVertexes.contains(arcMapMirror.get(arc).getStart())){ // Checking for the orientation of the arc
 						// Section for dealing with arcs from end to start
-						if(arcMap.get(arc).getOneWay() == 1){ // Discards arc if it can't be travelled down from end to start
+						if(arcMapMirror.get(arc).getOneWay() == 1){ // Discards arc if it can't be travelled down from end to start
 							Core.debug("Ignoring Arc, One Way Road");
 						}else{
-							double workingDistance = arcMap.get(arc).getWeight() + vertexMap.get(workingVertex).getDistanceFromSource(); // Sets the working distance to the current vertex's distance from the source + the weight of the arc
-							double workingWeightedDistance = arcMap.get(arc).getWeightedDistance() + vertexMap.get(workingVertex).getWeightedDistanceFromSource(); // Same as above but using weighted distance instead
-							if(workingWeightedDistance < vertexMap.get(arcMap.get(arc).getStart()).getWeightedDistanceFromSource()){ // If the working weighted distance is less that the target vertexes current weighted distance
+							double workingDistance = arcMapMirror.get(arc).getWeight() + vertexMapMirror.get(workingVertex).getDistanceFromSource(); // Sets the working distance to the current vertex's distance from the source + the weight of the arc
+							double workingWeightedDistance = arcMapMirror.get(arc).getWeightedDistance() + vertexMapMirror.get(workingVertex).getWeightedDistanceFromSource(); // Same as above but using weighted distance instead
+							if(workingWeightedDistance < vertexMapMirror.get(arcMapMirror.get(arc).getStart()).getWeightedDistanceFromSource()){ // If the working weighted distance is less that the target vertexes current weighted distance
 								Core.debug("  Modifying Start Vertex - Distance From Source = " + workingDistance);
 								Core.debug("  Modifying Start Vertex - Weighted Distance From Source = " + workingWeightedDistance);
-								vertexMap.get(arcMap.get(arc).getStart()).setDistanceFromSource(workingDistance); 
-								vertexMap.get(arcMap.get(arc).getStart()).setWeightedDistanceFromSource(workingWeightedDistance); // Assigns the working distance to the target vertex
-								vertexMap.get(arcMap.get(arc).getStart()).setPreviousVertex(workingVertex); // Assigns the current vertex as the target vertex's previous vertex
-								unsettledVertexes.add(arcMap.get(arc).getStart()); // If the target vertex is not present in the unsettled vertexes hashset then it is added - hashset doesn't accept duplicates
+								vertexMapMirror.get(arcMapMirror.get(arc).getStart()).setDistanceFromSource(workingDistance); 
+								vertexMapMirror.get(arcMapMirror.get(arc).getStart()).setWeightedDistanceFromSource(workingWeightedDistance); // Assigns the working distance to the target vertex
+								vertexMapMirror.get(arcMapMirror.get(arc).getStart()).setPreviousVertex(workingVertex); // Assigns the current vertex as the target vertex's previous vertex
+								unsettledVertexes.add(arcMapMirror.get(arc).getStart()); // If the target vertex is not present in the unsettled vertexes hashset then it is added - hashset doesn't accept duplicates
 							}else{ // Ignore target vertex if the route to its longer than its current distance from source
-								Core.debug("  Leaving Start Vertex - Distance From Source = " + vertexMap.get(arcMap.get(arc).getStart()).getDistanceFromSource() + ", Rejected Distance = " + workingDistance);
-								Core.debug("  Leaving Start Vertex - Weighted Distance From Source = " + vertexMap.get(arcMap.get(arc).getStart()).getWeightedDistanceFromSource() + ", Rejected Weighted Distance = " + workingWeightedDistance);
+								Core.debug("  Leaving Start Vertex - Distance From Source = " + vertexMapMirror.get(arcMapMirror.get(arc).getStart()).getDistanceFromSource() + ", Rejected Distance = " + workingDistance);
+								Core.debug("  Leaving Start Vertex - Weighted Distance From Source = " + vertexMapMirror.get(arcMapMirror.get(arc).getStart()).getWeightedDistanceFromSource() + ", Rejected Weighted Distance = " + workingWeightedDistance);
 							}
 						}
 					}
@@ -103,20 +107,20 @@ public class Graph {
 						Core.debug("Dead End: " + workingVertex);
 					}
 				}
-				//vertexMap.get(source).arcList.get(i)
+				//vertexMapMirror.get(source).arcList.get(i)
 			}
 		}
 		for(String vertexId : unsettledVertexes){
 			Core.debug(vertexId);
 		}
-		return null;
+		return null; //TODO USE NEW MAP SYSTEM ACROSS ALL FUNCTIONS
 	}
 	
-	private String getVertexWithLowestDistance(Set<String> set){ // Returns the vertex with the lowest distance from source in a hashset
+	private String getVertexWithLowestDistance(Set<String> set, HashMap<String,Vertex> vertexMapMirror){ // Returns the vertex with the lowest distance from source in a hashset
 		Double minimum = null; // Using the double wrapper class so that it can be assigned a null value for when first initialised
 		String minimumVertex = null;
 		for(String vertexId : set){ // Iterates through every vertex id in the hashset
-			Vertex tempVertex = vertexMap.get(vertexId); // Stores the vertex currently used in a temporary variable
+			Vertex tempVertex = vertexMapMirror.get(vertexId); // Stores the vertex currently used in a temporary variable
 			if(minimum == null){ // If this is the first vertex checked then the minimum will always be this vertex's distance from source
 				minimum = tempVertex.getDistanceFromSource();
 				minimumVertex = tempVertex.getId();
@@ -135,7 +139,7 @@ public class Graph {
 		Double minimum = null;
 		String minimumVertex = null;
 		for(String vertexId : set){
-			Vertex tempVertex = vertexMap.get(vertexId);
+			Vertex tempVertex = vertexMapMirror.get(vertexId);
 			if(minimum == null){
 				minimum = tempVertex.getWeightedDistanceFromSource();
 				minimumVertex = tempVertex.getId();
@@ -161,8 +165,8 @@ public class Graph {
 			temp = Math.pow(Math.sin((lat2 - lat1) / 2), 2) + (Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)); // A temporary value for use in the distance calculation
 			distance = EARTHDIAMETER * Math.asin(Math.sqrt(temp)); // Using the haversine formula to calculate the length of arcs using latitudes and longitudes - https://en.wikipedia.org/wiki/Haversine_formula 
 			tempArc.setWeight(distance); // Assigns unweighted distance to the arc being used
-			Core.debug("Way Id: " + tempArc.id);
-			Core.debug("  Dist: " + distance);
+			//Core.debug("Way Id: " + tempArc.id);
+			//Core.debug("  Dist: " + distance);
 			//Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph"); 
 			weightedDistance = distance/(getMaxSpeed(tempArc)); // Calculates weighted distance which is equal to time in hours of road by dividing distance by the average speed
 			//Core.debug("  Weighted Distance: " + weightedDistance); 
@@ -315,8 +319,8 @@ public class Graph {
 	}
 	
 	private Arc getArcConnectingTwoVertexes(String vertexId1, String vertexId2){ // Finds the id of an arc connecting two vertexes together
-		Vertex vertex1 = vertexMap.get(vertexId1);
-		Vertex vertex2 = vertexMap.get(vertexId2);
+		Vertex vertex1 = vertexMapMirror.get(vertexId1);
+		Vertex vertex2 = vertexMapMirror.get(vertexId2);
 		for(int i = 0; i < vertex1.arcList.size(); i++){ // Iterates through every arc connected to the first vertex
 			if(arcMap.get(vertex1.arcList.get(i)).getStart().equals(vertexId2) || arcMap.get(vertex1.arcList.get(i)).getEnd().equals(vertexId2)){ // Checks if the current arc also has the second vertex as a member
 				return arcMap.get(vertex1.arcList.get(i)); // If so return that arc
@@ -326,16 +330,14 @@ public class Graph {
 	}
 	
 	public String convertGraphToDirections(){
-		Core.debug(getExitOnRoundabout("1687317961","1687317956"));
-		Core.debug(getExitOnRoundabout("33071014", "2062355376"));
 		StringBuilder output = new StringBuilder();
 		String workingVertex = lastEnteredDestination;
-		String previousVertex = vertexMap.get(workingVertex).getPreviousVertex();
+		String previousVertex = vertexMapMirror.get(workingVertex).getPreviousVertex();
 		ArrayList<String> reverseRoute = new ArrayList<String>();
 		while(previousVertex != null){
 			reverseRoute.add(workingVertex);
 			workingVertex = previousVertex;
-			previousVertex = vertexMap.get(previousVertex).getPreviousVertex();
+			previousVertex = vertexMapMirror.get(previousVertex).getPreviousVertex();
 		}
 		reverseRoute.add(workingVertex);
 		Arc currentArc;
@@ -352,8 +354,8 @@ public class Graph {
 						if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
 							if(currentRoadRef != currentArc.tagList.get("ref")){
 								if(i != reverseRoute.size() - 1){
-									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+									output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 								}else{
 									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
@@ -376,8 +378,8 @@ public class Graph {
 								if(currentArc.tagList.get("name") == null || currentRoadName == null){
 									if(currentRoadName != currentArc.tagList.get("name")){
 										if(i != reverseRoute.size() - 1){
-											output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-											previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+											output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+											previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 										}else{
 											output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
@@ -394,8 +396,8 @@ public class Graph {
 								} else {
 									if(!currentRoadName.equals(currentArc.tagList.get("name"))){
 										if(i != reverseRoute.size() - 1){
-											output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-											previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+											output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+											previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 										}else{
 											output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
@@ -409,8 +411,8 @@ public class Graph {
 						} else {
 							if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
 								if(i != reverseRoute.size() - 1){
-									output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-									previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+									output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 								}else{
 									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
@@ -430,8 +432,8 @@ public class Graph {
 				} else {
 					if(currentArc.tagList.get("junction") == null){
 						inRoundabout = false;
-						output.append("After " + round((vertexMap.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-						previousDirectionDistance = vertexMap.get(reverseRoute.get(i)).getDistanceFromSource();
+						output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+						previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 						output.append("take the " + formatNumberToPlace(getExitOnRoundabout(roundaboutEntry,reverseRoute.get(i-1))) + " exit on the roundabout, onto ");
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
@@ -450,13 +452,13 @@ public class Graph {
 			}
 			//Core.debug(reverseRoute.get(i));
 		}
-		output.append("Time = " + vertexMap.get(reverseRoute.get(0)).getWeightedDistanceFromSource());
+		output.append("Time = " + vertexMapMirror.get(reverseRoute.get(0)).getWeightedDistanceFromSource() + "\n");
 		return output.toString();
 	}
 	
 	private double calculateBearing(String vertexId1, String vertexId2){
-		Vertex vertex1 = vertexMap.get(vertexId1);
-		Vertex vertex2 = vertexMap.get(vertexId2);
+		Vertex vertex1 = vertexMapMirror.get(vertexId1);
+		Vertex vertex2 = vertexMapMirror.get(vertexId2);
 		double lat1 = Math.toRadians(vertex1.getLat());
 		double lon1 = Math.toRadians(vertex1.getLon());
 		double lat2 = Math.toRadians(vertex2.getLat());
@@ -513,8 +515,8 @@ public class Graph {
 		int exits = 0;
 		String nextVertex = "";
 		do{
-			for(int i = 0; i < vertexMap.get(currentVertex).arcList.size(); i++){
-				String currentArc = vertexMap.get(currentVertex).arcList.get(i);
+			for(int i = 0; i < vertexMapMirror.get(currentVertex).arcList.size(); i++){
+				String currentArc = vertexMapMirror.get(currentVertex).arcList.get(i);
 				Core.debug("Inspecting: " + currentArc + ", on " + currentVertex);
 				if(arcMap.get(currentArc).tagList.get("junction") != null){
 					if(!arcMap.get(currentArc).tagList.get("junction").equals("roundabout")){

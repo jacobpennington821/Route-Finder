@@ -27,6 +27,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	private JTabbedPane tabPane;             //---> 
 	DataHandler dataHandler;                 //-->
 	private JTextArea outputBox;             //->
+	boolean travelVia = false;
 
 	
 	public RouteFinderGUI(Parser parser){ // GUI requires the parser being created before being constructed itself - byproduct of single threading means parser needs to parse map before showing UI
@@ -61,6 +62,20 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         originInputField = new JTextField(20); // Creates a text field of 20 columns
         JLabel destinationInputLabel = new JLabel("Input Destination");
         destinationInputField = new JTextField(20);
+        JCheckBox viaCheckbox = new JCheckBox("Travel Via");
+        viaCheckbox.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent event){
+        		if(viaCheckbox.isSelected()){
+        			travelVia = true;
+        		}else{
+        			if(!viaCheckbox.isSelected()){
+        				travelVia = false;
+        			}
+        		}
+        	}
+        });
+        JLabel viaInputLabel = new JLabel("Travel Via");
+        JTextField viaInputField = new JTextField(20);
         JButton calculateButton = new JButton("Calculate Route");
         calculateButton.addActionListener(new ActionListener() { // Creates the method for what to do when the "calculate" button is pressed
         	public void actionPerformed(ActionEvent event){
@@ -88,9 +103,30 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     					showWarning("Destination not present on current map. Please refine your search", "Node Not Present");
     					return;
     				}
-    				parser.map.shortestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
-    				tabPane.setSelectedIndex(1); // Changes the tab to the output tab
-    				outputBox.append(parser.map.convertGraphToDirections()); // Adds the directions to the output tab
+    				
+    				if(travelVia){
+        				String viaResponse = dataHandler.convertInputToNodeId(viaInputField.getText()); // Sends the destination text to the data handler
+        				if(viaResponse == "!internet"){
+        					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
+        					return;
+        				}
+        				if(viaResponse == "!presence" || viaResponse == null){
+        					showWarning("Travel Via destination not present on current map. Please refine your search", "Node Not Present");
+        					return;
+        				}
+        				Core.debug(originResponse + " to " + viaResponse);
+        				parser.map.shortestRoute(originResponse, viaResponse);
+        				tabPane.setSelectedIndex(1);
+        				outputBox.append(parser.map.convertGraphToDirections());
+        				Core.debug(viaResponse + " to " + destinationResponse);
+        				parser.map.shortestRoute(viaResponse, destinationResponse);
+        				outputBox.append(parser.map.convertGraphToDirections());
+    				}else{
+        				parser.map.shortestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
+        				tabPane.setSelectedIndex(1); // Changes the tab to the output tab
+        				outputBox.append(parser.map.convertGraphToDirections()); // Adds the directions to the output tab
+    				}
+
     			}
         	}
         });
@@ -102,10 +138,12 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
                 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 		.addComponent(originInputLabel)
                                         .addComponent(destinationInputLabel)
+                                        .addComponent(viaCheckbox)
                                         )
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 		.addComponent(originInputField)
                                         .addComponent(destinationInputField)
+                                        .addComponent(viaInputField)
                                         )
                 				)
                 		.addComponent(calculateButton)
@@ -121,6 +159,10 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
                 		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 				.addComponent(destinationInputLabel)
                 				.addComponent(destinationInputField)
+                				)
+                		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                				.addComponent(viaCheckbox)
+                				.addComponent(viaInputField)
                 				)
                 		.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
                 				.addComponent(calculateButton)
