@@ -20,8 +20,20 @@ public class Vertex {
 		this.arcList = new ArrayList<String>(); // Initialises the arraylist 
 	}
 	
+	public Vertex(String id, double lat, double lon, ArrayList<String> arcList){
+		this.setId(id);
+		this.setLat(lat);
+		this.setLon(lon);
+		this.arcList = arcList;
+	}
+	
 	public void printInfo(){
 		System.out.println("ID: " + getId() + ", lat: " + getLat() + ", lon: " + getLon());
+	}
+	
+	@Override
+	public Vertex clone(){
+		return new Vertex(this.id,this.lat,this.lon,this.arcList);
 	}
 	
 	///////////////////////// GETTERS AND SETTERS ////////////////////////////////
