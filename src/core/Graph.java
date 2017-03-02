@@ -330,32 +330,32 @@ public class Graph {
 		return null;
 	}
 	
-	public String convertGraphToDirections(){
-		StringBuilder output = new StringBuilder();
+	public String convertGraphToDirections(){ // Converts the current vertexMap to directions
+		StringBuilder output = new StringBuilder(); // The overall output stringbuilder that is added to with each direction
 		String workingVertex = lastEnteredDestination;
 		String previousVertex = vertexMapMirror.get(workingVertex).getPreviousVertex();
-		ArrayList<String> reverseRoute = new ArrayList<String>();
+		ArrayList<String> reverseRoute = new ArrayList<String>(); // The route stored in reverse order
 		while(previousVertex != null){
 			reverseRoute.add(workingVertex);
 			workingVertex = previousVertex;
-			previousVertex = vertexMapMirror.get(previousVertex).getPreviousVertex();
+			previousVertex = vertexMapMirror.get(previousVertex).getPreviousVertex(); // Working backwards along the route to find each vertex used
 		}
-		reverseRoute.add(workingVertex);
+		reverseRoute.add(workingVertex); // Adds the first vertex to the route
 		Arc currentArc;
-		String currentRoadRef = "!novalue";
-		String currentRoadName = "!novalue";
+		String currentRoadRef = "!novalue"; // !novalue acts as null in this situation as null is an acceptable value
+		String currentRoadName = "!novalue"; // These two variables store the values of ref and name tags of the current road
 		boolean inRoundabout = false;
-		String roundaboutEntry = "";
+		String roundaboutEntry = ""; // Stores the value of the first vertex's id in a roundabout
 		double previousDirectionDistance = 0;
-		for(int i = reverseRoute.size() - 1; i >= 0; i--){
-			if(i != 0){
+		for(int i = reverseRoute.size() - 1; i >= 0; i--){ // Iterates through every vertex in the route
+			if(i != 0){ // Ensures no arc is retrieved using only one vertex
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
 				if(!inRoundabout){
 					if(currentArc.tagList.get("junction") == null){
-						if(currentArc.tagList.get("ref") == null || currentRoadRef == null){
-							if(currentRoadRef != currentArc.tagList.get("ref")){
-								if(i != reverseRoute.size() - 1){
-									output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+						if(currentArc.tagList.get("ref") == null || currentRoadRef == null){ // First comparison is made using the road reference - This comparison checks which comparison operator can be used later as .equals breaks when called on a null string
+							if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found, != is used as one of the values is null
+								if(i != reverseRoute.size() - 1){ // Ensures this is not the first direction
+									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
 									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 								}else{
@@ -377,9 +377,9 @@ public class Graph {
 								}
 							} else {
 								if(currentArc.tagList.get("name") == null || currentRoadName == null){
-									if(currentRoadName != currentArc.tagList.get("name")){
+									if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){
 										if(i != reverseRoute.size() - 1){
-											output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+											output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 											previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 										}else{
@@ -395,9 +395,9 @@ public class Graph {
 										}
 									}
 								} else {
-									if(!currentRoadName.equals(currentArc.tagList.get("name"))){
+									if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){
 										if(i != reverseRoute.size() - 1){
-											output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+											output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 											previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 										}else{
@@ -410,9 +410,9 @@ public class Graph {
 								}
 							}
 						} else {
-							if(!currentRoadRef.equals(currentArc.tagList.get("ref"))){
+							if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){
 								if(i != reverseRoute.size() - 1){
-									output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
 								}else{
@@ -425,7 +425,7 @@ public class Graph {
 							}
 						}
 					} else {
-						if(currentArc.tagList.get("junction").equals("roundabout")){
+						if(Utilities.checkStringsAreEqual(currentArc.tagList.get("junction"), "roundabout")){
 							inRoundabout = true;
 							roundaboutEntry = reverseRoute.get(i-1);
 						}
@@ -433,9 +433,9 @@ public class Graph {
 				} else {
 					if(currentArc.tagList.get("junction") == null){
 						inRoundabout = false;
-						output.append("After " + round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+						output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 						previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-						output.append("take the " + formatNumberToPlace(getExitOnRoundabout(roundaboutEntry,reverseRoute.get(i-1))) + " exit on the roundabout, onto ");
+						output.append("take the " + Utilities.formatNumberToPlace(getExitOnRoundabout(roundaboutEntry, reverseRoute.get(i-1))) + " exit on the roundabout, onto ");
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
 						if(currentRoadRef == null){
@@ -475,7 +475,7 @@ public class Graph {
 	
 	private String getBearingString(String vertexId1, String vertexId2){
 		double bearing = calculateBearing(vertexId1, vertexId2);
-		if(((7 * Math.PI) / 4 <= bearing && bearing <= 2 * Math.PI )|| (bearing <= 0 && bearing < (Math.PI / 4))){
+		if(((7 * Math.PI) / 4 <= bearing && bearing <= 2 * Math.PI ) || (bearing >= 0 && bearing < (Math.PI / 4))){
 			return "north";
 		}
 		if(Math.PI / 4 <= bearing && bearing < (3 * Math.PI) / 4){
@@ -501,13 +501,7 @@ public class Graph {
 		return "Invalid";
 	}
 
-	public static double round(double value, int places) {
-	    if (places < 0) throw new IllegalArgumentException();
-	
-	    BigDecimal bd = new BigDecimal(value);
-	    bd = bd.setScale(places, RoundingMode.HALF_UP);
-	    return bd.doubleValue();
-	}
+
 	
 	private int getExitOnRoundabout(String startingVertex, String exitVertex){
 		Core.debug("Start: " + startingVertex + ", End: " + exitVertex);
@@ -564,18 +558,7 @@ public class Graph {
 		return exits;
 	}
 	
-	private String formatNumberToPlace(int number){
-		switch(number){
-		case 1:
-			return number + "st";
-		case 2:
-			return number + "nd";
-		case 3:
-			return number + "rd";
-		default:
-			return number + "th";
-		}
-	}
+
 	
 	private HashMap<String,Vertex> cloneVertexMap(HashMap<String,Vertex> vertexMapToClone){
 		final double startTime = System.nanoTime();
@@ -587,4 +570,5 @@ public class Graph {
 		System.out.println("Time To Clone: " + duration/1000000000 + " seconds");
 		return clone;
 	}
+	
 }

@@ -47,7 +47,6 @@ public class DataHandler { // The data handler receives input from the GUI and p
 				xmlResponse.append(outputLine); // Adds each line in the XML document to one large string for analysing
 			}
 			Core.debug(xmlResponse);
-			
 			if(xmlResponse.indexOf("osm_type") != -1){ // Ensures the tag "osm_type" is present
 				nodeId = null;
 				int osm_typeIndex = xmlResponse.indexOf("osm_type") + xmlResponse.substring(xmlResponse.indexOf("osm_type")).indexOf("'") + 1; // Finds the index in the string of the value of the "osm_type" tag
@@ -62,7 +61,6 @@ public class DataHandler { // The data handler receives input from the GUI and p
 						return nodeId;
 					}
 					return "!presence";
-					
 				}else{
 					if(osm_type.equals("node")){ // If the id is a node id
 						nodeId = xmlResponse.substring(osm_idIndex, osm_idIndex + xmlResponse.substring(osm_idIndex).indexOf("'")); // Extracts the node id from the "osm_id" tag
@@ -76,16 +74,12 @@ public class DataHandler { // The data handler receives input from the GUI and p
 					}
 				}
 			}
-			
-			
 		}catch(java.net.UnknownHostException e){ // Triggered when the program cannot connect to the openstreetmap website
 			Core.debug("No Internet Connection");
 			return "!internet";
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Core.debug(urlString);
