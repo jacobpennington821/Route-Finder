@@ -352,65 +352,30 @@ public class Graph {
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
 				if(!inRoundabout){
 					if(currentArc.tagList.get("junction") == null){
-						if(currentArc.tagList.get("ref") == null || currentRoadRef == null){ // First comparison is made using the road reference - This comparison checks which comparison operator can be used later as .equals breaks when called on a null string
-							if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found, != is used as one of the values is null
-								if(i != reverseRoute.size() - 1){ // Ensures this is not the first direction
-									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
-									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-								}else{
-									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-								}
-								currentRoadRef = currentArc.tagList.get("ref");
-								currentRoadName = currentArc.tagList.get("name");
-								if(currentRoadRef == null){
-									if(currentRoadName == null){
-										Core.debug("Unnamed Road");
-										output.append("Unnamed Road\n");
-									} else {
-										Core.debug(currentRoadName);
-										output.append(currentRoadName + "\n");
-									}
+						if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found, != is used as one of the values is null
+							if(i != reverseRoute.size() - 1){ // Ensures this is not the first direction
+								output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
+								previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
+								output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+							}else{
+								output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+							}
+							currentRoadRef = currentArc.tagList.get("ref");
+							currentRoadName = currentArc.tagList.get("name");
+							if(currentRoadRef == null){
+								if(currentRoadName == null){
+									Core.debug("Unnamed Road");
+									output.append("Unnamed Road\n");
 								} else {
-									Core.debug(currentRoadRef);
-									output.append(currentRoadRef + "\n");
+									Core.debug(currentRoadName);
+									output.append(currentRoadName + "\n");
 								}
 							} else {
-								if(currentArc.tagList.get("name") == null || currentRoadName == null){
-									if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){
-										if(i != reverseRoute.size() - 1){
-											output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-											previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-										}else{
-											output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-										}
-										currentRoadName = currentArc.tagList.get("name");
-										if(currentRoadName == null){
-											Core.debug("Unnamed Road");
-											output.append("Unnamed Road\n");
-										} else {
-											Core.debug(currentRoadName);
-											output.append(currentRoadName + "\n");
-										}
-									}
-								} else {
-									if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){
-										if(i != reverseRoute.size() - 1){
-											output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-											previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-											output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-										}else{
-											output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-										}
-										currentRoadName = currentArc.tagList.get("name");
-										Core.debug(currentRoadName);
-										output.append(currentRoadName + "\n");
-									}
-								}
+								Core.debug(currentRoadRef);
+								output.append(currentRoadRef + "\n");
 							}
 						} else {
-							if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){
+							if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){
 								if(i != reverseRoute.size() - 1){
 									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
@@ -418,10 +383,14 @@ public class Graph {
 								}else{
 									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
 								}
-								currentRoadRef = currentArc.tagList.get("ref");
 								currentRoadName = currentArc.tagList.get("name");
-								Core.debug(currentRoadRef);
-								output.append(currentRoadRef + "\n");
+								if(currentRoadName == null){
+									Core.debug("Unnamed Road");
+									output.append("Unnamed Road\n");
+								} else {
+									Core.debug(currentRoadName);
+									output.append(currentRoadName + "\n");
+								}
 							}
 						}
 					} else {
