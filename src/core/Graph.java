@@ -345,51 +345,63 @@ public class Graph {
 		String currentRoadRef = "!novalue"; // !novalue acts as null in this situation as null is an acceptable value
 		String currentRoadName = "!novalue"; // These two variables store the values of ref and name tags of the current road
 		boolean inRoundabout = false;
+		boolean compassDirection = false;
 		String roundaboutEntry = ""; // Stores the value of the first vertex's id in a roundabout
 		double previousDirectionDistance = 0;
-		for(int i = reverseRoute.size() - 1; i >= 0; i--){ // Iterates through every vertex in the route
+		for(int i = reverseRoute.size() - 1; i >= 0; i--){
+			compassDirection = false;// Iterates through every vertex in the route
 			if(i != 0){ // Ensures no arc is retrieved using only one vertex
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
 				if(!inRoundabout){
 					if(currentArc.tagList.get("junction") == null){
 						if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found, != is used as one of the values is null
-							if(i != reverseRoute.size() - 1){ // Ensures this is not the first direction
-								output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
-								previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-								output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+							if(i != reverseRoute.size() - 1){// Ensures this is not the first direction
+								if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){
+									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
+									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
+									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+								}
 							}else{
 								output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+								compassDirection = true;
 							}
 							currentRoadRef = currentArc.tagList.get("ref");
 							currentRoadName = currentArc.tagList.get("name");
-							if(currentRoadRef == null){
-								if(currentRoadName == null){
-									Core.debug("Unnamed Road");
-									output.append("Unnamed Road\n");
+							if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){
+								if (currentRoadRef == null) {
+									if (currentRoadName == null) {
+										Core.debug("Unnamed Road");
+										output.append("Unnamed Road\n");
+									} else {
+										Core.debug(currentRoadName);
+										output.append(currentRoadName + "\n");
+									}
 								} else {
-									Core.debug(currentRoadName);
-									output.append(currentRoadName + "\n");
+									Core.debug(currentRoadRef);
+									output.append(currentRoadRef + "\n");
 								}
-							} else {
-								Core.debug(currentRoadRef);
-								output.append(currentRoadRef + "\n");
 							}
 						} else {
 							if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){
 								if(i != reverseRoute.size() - 1){
-									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+									if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){
+										output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
+										previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
+										output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+									}
 								}else{
 									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
+									compassDirection = true;
 								}
 								currentRoadName = currentArc.tagList.get("name");
-								if(currentRoadName == null){
-									Core.debug("Unnamed Road");
-									output.append("Unnamed Road\n");
-								} else {
-									Core.debug(currentRoadName);
-									output.append(currentRoadName + "\n");
+								if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){
+									if(currentRoadName == null){
+										Core.debug("Unnamed Road");
+										output.append("Unnamed Road\n");
+									} else {
+										Core.debug(currentRoadName);
+										output.append(currentRoadName + "\n");
+									}
 								}
 							}
 						}
@@ -423,7 +435,7 @@ public class Graph {
 			//Core.debug(reverseRoute.get(i));
 		}
 		output.append("Time = " + vertexMapMirror.get(reverseRoute.get(0)).getWeightedDistanceFromSource() + "\n");
-		return output.toString();
+		return output.toString().replaceAll("&apos;", "'");
 	}
 	
 	private double calculateBearing(String vertexId1, String vertexId2){
