@@ -10,8 +10,8 @@ public final class Utilities {
 	}
 	
 	public static boolean checkStringsAreEqual(String stringA, String stringB){
-		if(stringA == null || stringB == null){
-			if(stringA == stringB){
+		if(stringA == null || stringB == null){ // If either string is null
+			if(stringA == stringB){ // Can't use .equals()
 				return true;
 			} else {
 				return false;

@@ -344,47 +344,47 @@ public class Graph {
 		Arc currentArc;
 		String currentRoadRef = "!novalue"; // !novalue acts as null in this situation as null is an acceptable value
 		String currentRoadName = "!novalue"; // These two variables store the values of ref and name tags of the current road
-		boolean inRoundabout = false;
-		boolean compassDirection = false;
+		boolean inRoundabout = false; // True if the current vertex is in a roundabout
+		boolean compassDirection = false; // A marker for if the direction is a "Travel east" direction
 		String roundaboutEntry = ""; // Stores the value of the first vertex's id in a roundabout
 		double previousDirectionDistance = 0;
-		for(int i = reverseRoute.size() - 1; i >= 0; i--){
-			compassDirection = false;// Iterates through every vertex in the route
-			if(i != 0){ // Ensures no arc is retrieved using only one vertex
+		for(int i = reverseRoute.size() - 1; i >= 0; i--){ // Iterates through every vertex in the route
+			compassDirection = false; // Resets the marker for if the direction is a "Travel north" direction on each new vertex
+			if(i != 0){ // Ensures no arc is retrieved using only one vertex - can't do i - 1 if i == 0
 				currentArc = getArcConnectingTwoVertexes(reverseRoute.get(i), reverseRoute.get(i-1));
-				if(!inRoundabout){
-					if(currentArc.tagList.get("junction") == null){
-						if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found, != is used as one of the values is null
+				if(!inRoundabout){ // Checks the vertex isnt in a roundabout
+					if(currentArc.tagList.get("junction") == null){ // Checks the vertex isn't the first in a roundabout
+						if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found
 							if(i != reverseRoute.size() - 1){// Ensures this is not the first direction
-								if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){
+								if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){ // Checks if the vertex actually has more than two arcs coming off it - only two means there isnt any choice of where to turn - no direction required
 									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
-									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource(); // Assigns the distance from the source of the current vertex to previousDirectionDistance so that the next direction can measure the distance since the previous direction
+									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto "); // Adds the turn direction to the output using the previous, current and next vertexes
 								}
-							}else{
-								output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-								compassDirection = true;
+							}else{ // Triggered if the instruction is the first instruction
+								output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along "); // Adds the first direction format of "Travel north along "
+								compassDirection = true; // A marker to ensure that the road name adding section is executed even though the direction is not a turning
 							}
-							currentRoadRef = currentArc.tagList.get("ref");
-							currentRoadName = currentArc.tagList.get("name");
-							if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){
+							currentRoadRef = currentArc.tagList.get("ref"); // Stores the current road ref and name for use in later comparisons
+							currentRoadName = currentArc.tagList.get("name"); // ^
+							if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){ // Only triggers if the turning can have more than one option - one option is not a turning
 								if (currentRoadRef == null) {
 									if (currentRoadName == null) {
 										Core.debug("Unnamed Road");
-										output.append("Unnamed Road\n");
+										output.append("Unnamed Road\n"); // If neither ref or name have values then the road is unnamed
 									} else {
 										Core.debug(currentRoadName);
-										output.append(currentRoadName + "\n");
+										output.append(currentRoadName + "\n"); // Uses name if it has a value and ref doesnt
 									}
 								} else {
 									Core.debug(currentRoadRef);
-									output.append(currentRoadRef + "\n");
+									output.append(currentRoadRef + "\n"); // Uses ref if it has a value
 								}
 							}
 						} else {
-							if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){
-								if(i != reverseRoute.size() - 1){
-									if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){
+							if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){ // If ref is the same compare name instead
+								if(i != reverseRoute.size() - 1){ // Ensures this isnt the first direction
+									if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){ // Check for more than two arcs - reduces false positives
 										output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
 										previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
 										output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
@@ -395,7 +395,7 @@ public class Graph {
 								}
 								currentRoadName = currentArc.tagList.get("name");
 								if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){
-									if(currentRoadName == null){
+									if(currentRoadName == null){ // Only needs to check for a name as this code block is only executed if ref is already null
 										Core.debug("Unnamed Road");
 										output.append("Unnamed Road\n");
 									} else {
@@ -405,18 +405,18 @@ public class Graph {
 								}
 							}
 						}
-					} else {
+					} else { // Triggered if the vertex has a value for the "junction" tag
 						if(Utilities.checkStringsAreEqual(currentArc.tagList.get("junction"), "roundabout")){
-							inRoundabout = true;
-							roundaboutEntry = reverseRoute.get(i-1);
+							inRoundabout = true; // Ensures no directions such as "turn left" are triggered until the roundabout is cleared
+							roundaboutEntry = reverseRoute.get(i-1); // Roundabout entry is the first vertex which lies on the roundabout
 						}
 					}
-				} else {
-					if(currentArc.tagList.get("junction") == null){
-						inRoundabout = false;
-						output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-						previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-						output.append("take the " + Utilities.formatNumberToPlace(getExitOnRoundabout(roundaboutEntry, reverseRoute.get(i-1))) + " exit on the roundabout, onto ");
+				} else { // Triggered when the marker for being in a roundabout is true
+					if(currentArc.tagList.get("junction") == null){ // Checks if the current arc is no longer in the roundabout - otherwise do nothing and go to the next arc
+						inRoundabout = false; // Flags the function is no longer in a roundabout and normal directions can continue
+						output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Calculates the distance since the last direction
+						previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource(); // Assigns the current vertex's distance from source as the direction distance
+						output.append("take the " + Utilities.formatNumberToPlace(getExitOnRoundabout(roundaboutEntry, reverseRoute.get(i-1))) + " exit on the roundabout, onto "); // Works out the exit on the roundabout by using the first vertex on the roundabout and the first vertex after that isnt
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
 						if(currentRoadRef == null){
@@ -438,7 +438,7 @@ public class Graph {
 		return output.toString().replaceAll("&apos;", "'");
 	}
 	
-	private double calculateBearing(String vertexId1, String vertexId2){
+	private double calculateBearing(String vertexId1, String vertexId2){ // Calculates the angle between two vertexes relative to north
 		Vertex vertex1 = vertexMapMirror.get(vertexId1);
 		Vertex vertex2 = vertexMapMirror.get(vertexId2);
 		double lat1 = Math.toRadians(vertex1.getLat());
@@ -447,25 +447,25 @@ public class Graph {
 		double lon2 = Math.toRadians(vertex2.getLon());
 		double temp1 = Math.cos(lat2) * Math.sin(lon2 - lon1);
 		double temp2 = (Math.cos(lat1) * Math.sin(lat2)) - (Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1));
-		double bearing = Math.atan2(temp1, temp2);
+		double bearing = Math.atan2(temp1, temp2); // http://www.movable-type.co.uk/scripts/latlong.html#bearing
 		if(bearing < 0){
-			bearing += 2 * Math.PI;
+			bearing += 2 * Math.PI; // Ensures no negative values are created, which would break other parts of the system, by adding 2 pi as a circle contains 2 pi radians
 		}
 		return bearing;
 	}
 	
-	private String getBearingString(String vertexId1, String vertexId2){
+	private String getBearingString(String vertexId1, String vertexId2){ // Returns a string based bearing between two vertexes
 		double bearing = calculateBearing(vertexId1, vertexId2);
-		if(((7 * Math.PI) / 4 <= bearing && bearing <= 2 * Math.PI ) || (bearing >= 0 && bearing < (Math.PI / 4))){
+		if(((7 * Math.PI) / 4 <= bearing && bearing <= 2 * Math.PI ) || (bearing >= 0 && bearing < (Math.PI / 4))){ // Northern quadrant contains from 7/4 pi to 0 and 0 to 1/4 pi
 			return "north";
 		}
-		if(Math.PI / 4 <= bearing && bearing < (3 * Math.PI) / 4){
+		if(Math.PI / 4 <= bearing && bearing < (3 * Math.PI) / 4){ // Eastern quadrant contains 1/4 pi to 3/4 pi
 			return "east";
 		}
-		if((3 * Math.PI) / 4 <= bearing && bearing < (5 * Math.PI) / 4){
+		if((3 * Math.PI) / 4 <= bearing && bearing < (5 * Math.PI) / 4){ // Southern quadrant contains 3/4 pi to 5/4 pi
 			return "south";
 		}
-		if((5 * Math.PI) / 4 <= bearing && bearing < (7 * Math.PI) / 4){
+		if((5 * Math.PI) / 4 <= bearing && bearing < (7 * Math.PI) / 4){ // Western quadrant contains 5/4 pi to 7/4 pi
 			return "west";
 		}
 		return "invalid";
@@ -484,58 +484,39 @@ public class Graph {
 
 
 	
-	private int getExitOnRoundabout(String startingVertex, String exitVertex){
+	private int getExitOnRoundabout(String startingVertex, String exitVertex){ // Returns the number of exits that occur before a given vertex is reached on a roundabout
 		Core.debug("Start: " + startingVertex + ", End: " + exitVertex);
 		String currentVertex = startingVertex;
-		boolean found = false;
 		int exits = 0;
 		String nextVertex = "";
 		do{
-			for(int i = 0; i < vertexMapMirror.get(currentVertex).arcList.size(); i++){
+			for(int i = 0; i < vertexMapMirror.get(currentVertex).arcList.size(); i++){ // Iterates through every arc on the vertex
 				String currentArc = vertexMapMirror.get(currentVertex).arcList.get(i);
 				Core.debug("Inspecting: " + currentArc + ", on " + currentVertex);
-				if(arcMap.get(currentArc).tagList.get("junction") != null){
-					if(!arcMap.get(currentArc).tagList.get("junction").equals("roundabout")){
-						if(arcMap.get(currentArc).getStart().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != -1){
-							Core.debug(currentArc + " is an exit");
-							exits++;
-							if(arcMap.get(currentArc).getEnd().equals(exitVertex)){
-								return exits;
-							}
-						}
-						if(arcMap.get(currentArc).getEnd().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != 1){
-							Core.debug(currentArc + " is an exit");
-							exits++;
-							if(arcMap.get(currentArc).getStart().equals(exitVertex)){
-								return exits;
-							}
-						}
-					}else{
-						if(arcMap.get(currentArc).getStart().equals(currentVertex)){
-							nextVertex = arcMap.get(currentArc).getEnd();
-							Core.debug("Discovered next vertex: " + nextVertex);
-						}						
-						
-					}
-				}else{
-					if(arcMap.get(currentArc).getStart().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != -1){
+				if(!Utilities.checkStringsAreEqual(arcMap.get(currentArc).tagList.get("junction"), "roundabout")){ // Checks if the arc is not on the roundabout - means its either an exit or not traversable
+					if(arcMap.get(currentArc).getStart().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != -1){ // True if arc is traversable - therefore an exit
 						Core.debug(currentArc + " is an exit");
 						exits++;
-						if(arcMap.get(currentArc).getEnd().equals(exitVertex)){
+						if(arcMap.get(currentArc).getEnd().equals(exitVertex)){ // If the end of the exit is the destination then the function is complete
 							return exits;
 						}
 					}
 					if(arcMap.get(currentArc).getEnd().equals(currentVertex) && arcMap.get(currentArc).getOneWay() != 1){
 						Core.debug(currentArc + " is an exit");
 						exits++;
-						if(arcMap.get(currentArc).getStart().equals(exitVertex)){
+						if(arcMap.get(currentArc).getStart().equals(exitVertex)){ // Same as previous block but for inverted one way arcs
 							return exits;
 						}
 					}
+				}else{ // If arc is on roundabout check for the arc that leads to the next vertex to check
+					if(arcMap.get(currentArc).getStart().equals(currentVertex)){ // Vertexes are stored in order of way round a roundabout so there is only one arc with a start and end round the correct way - checks for this
+						nextVertex = arcMap.get(currentArc).getEnd(); // Assigns the next vertex to go to
+						Core.debug("Discovered next vertex: " + nextVertex);
+					}								
 				}
 			}
 			currentVertex = nextVertex;
-		}while(!currentVertex.equals(startingVertex) || !found);
+		}while(!currentVertex.equals(startingVertex)); // Base case of if the roundabout has been traversed all the way around
 		return exits;
 	}
 	
