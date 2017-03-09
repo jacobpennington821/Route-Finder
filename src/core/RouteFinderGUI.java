@@ -27,7 +27,11 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	private JTabbedPane tabPane;             //---> 
 	DataHandler dataHandler;                 //-->
 	private JTextArea outputBox;             //->
+	private JLabel distanceLabel;
+	private JLabel timeLabel;
 	boolean travelVia = false;
+	private double distanceOfRoute = 0;
+	private double timeOfRoute = 0;
 
 	
 	public RouteFinderGUI(Parser parser){ // GUI requires the parser being created before being constructed itself - byproduct of single threading means parser needs to parse map before showing UI
@@ -118,15 +122,34 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         				parser.map.shortestRoute(originResponse, viaResponse);
         				tabPane.setSelectedIndex(1);
         				outputBox.append(parser.map.convertGraphToDirections());
+        				distanceOfRoute = parser.map.calculatedRouteDistance;
+        				timeOfRoute = parser.map.calculatedRouteTime;
         				Core.debug(viaResponse + " to " + destinationResponse);
         				parser.map.shortestRoute(viaResponse, destinationResponse);
         				outputBox.append(parser.map.convertGraphToDirections());
+        				distanceOfRoute += parser.map.calculatedRouteDistance;
+        				timeOfRoute += parser.map.calculatedRouteTime;
+
     				}else{
         				parser.map.shortestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
         				tabPane.setSelectedIndex(1); // Changes the tab to the output tab
         				outputBox.append(parser.map.convertGraphToDirections()); // Adds the directions to the output tab
+        				distanceOfRoute = parser.map.calculatedRouteDistance;
+        				timeOfRoute = parser.map.calculatedRouteTime;
     				}
-
+    				distanceLabel.setText("Distance: " + Utilities.round(distanceOfRoute,2) + " km");
+    				if(timeOfRoute < 1){
+    					if(timeOfRoute < (0.017)){
+    						timeLabel.setText("Time: " + Utilities.round((timeOfRoute*60)*60, 0) + " seconds");
+    						// Seconds scale
+    					} else {
+    						timeLabel.setText("Time: " + Utilities.round(timeOfRoute*60, 0) + " minutes");
+    						// Minutes scale
+    					}
+    				}else{
+    					timeLabel.setText("Time: " + Utilities.round(timeOfRoute, 2) + " hours");
+    					// Hours and minutes scale
+    				}
     			}
         	}
         });
@@ -184,8 +207,24 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		c.weightx = 1;
 		c.weighty = 1;
 		c.gridheight = 2;
-		c.gridwidth = 2;
+		c.gridwidth = 4;
 		panel.add(scroll, c); // Adds the box to the UI with the same constraints as above
+		distanceLabel = new JLabel("Distance: ");
+		c = new GridBagConstraints();
+		c.gridheight = 1;
+		c.gridx = 0;
+		c.gridy = 2;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(distanceLabel, c);
+		timeLabel = new JLabel("Time: ");
+		c = new GridBagConstraints();
+		c.gridheight = 1;
+		c.gridx = 1;
+		c.gridy = 2;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(timeLabel, c);
 		JButton printButton = new JButton("Print"); // Creates the print button
 		printButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent event){ // Event that is triggered when the print button is pressed
@@ -198,8 +237,9 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		});
 		c = new GridBagConstraints(); // Resets the constraints to prevent overlapping variables
 		c.gridheight = 1;
-		c.gridx = 0;
+		c.gridx = 2;
 		c.gridy = 2;
+		c.weightx = 0;
 		c.fill = GridBagConstraints.NONE;
 		panel.add(printButton, c); // Adds the print button to the UI with the constraints above
 		JButton copyToClipboardButton = new JButton("Copy To Clipboard"); // Creates the copy to clipboard button
@@ -213,8 +253,9 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		});
 		c = new GridBagConstraints(); // Resets the constraints again
 		c.gridheight = 1;
-		c.gridx = 1;
+		c.gridx = 3;
 		c.gridy = 2;
+		c.weightx = 0;
 		c.fill = GridBagConstraints.NONE;
 		panel.add(copyToClipboardButton, c); // Adds the coppy to clipboard button to the UI
 		//panel.setPreferredSize(new Dimension(500,400));
