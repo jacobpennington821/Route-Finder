@@ -20,6 +20,9 @@ public class Graph {
 	private String lastEnteredSource;
 	private String lastEnteredDestination;
 	
+	public double calculatedRouteDistance = 0;
+	public double calculatedRouteTime = 0;
+	
 	public Graph(HashMap<String,Vertex> vertexMap, HashMap<String,Arc> arcMap){
 		this.vertexMap = vertexMap;
 		this.arcMap = arcMap;
@@ -114,7 +117,7 @@ public class Graph {
 		for(String vertexId : unsettledVertexes){
 			Core.debug(vertexId);
 		}
-		return null; //TODO USE NEW MAP SYSTEM ACROSS ALL FUNCTIONS
+		return null;
 	}
 	
 	private String getVertexWithLowestDistance(Set<String> set){ // Returns the vertex with the lowest distance from source in a hashset
@@ -434,6 +437,8 @@ public class Graph {
 			}
 			//Core.debug(reverseRoute.get(i));
 		}
+		calculatedRouteDistance = vertexMapMirror.get(reverseRoute.get(0)).getDistanceFromSource();
+		calculatedRouteTime = vertexMapMirror.get(reverseRoute.get(0)).getWeightedDistanceFromSource();
 		output.append("Time = " + vertexMapMirror.get(reverseRoute.get(0)).getWeightedDistanceFromSource() + "\n");
 		return output.toString().replaceAll("&apos;", "'");
 	}
@@ -472,14 +477,14 @@ public class Graph {
 	}
 	
 	private String calculateDirection(String vertexId1, String vertexId2, String vertexId3){
-		double directionValue = calculateBearing(vertexId1,vertexId2) - calculateBearing(vertexId2,vertexId3);
+		double directionValue = calculateBearing(vertexId1,vertexId2) - calculateBearing(vertexId2,vertexId3); // Gets the difference between the two bearings
 		if((-Math.PI < directionValue && directionValue < 0) || (Math.PI < directionValue && directionValue < 2 * Math.PI)){
 			return "right";
 		}
 		if((0 < directionValue && directionValue < Math.PI) || (-2 * Math.PI < directionValue && directionValue < -Math.PI)){
 			return "left";
 		}
-		return "Invalid";
+		return "Invalid"; // If value is out of range, the bearings supplied are incorrect
 	}
 
 
@@ -529,7 +534,7 @@ public class Graph {
 			clone.put(key, vertexMap.get(key).clone());
 		}
 		final double duration = System.nanoTime() - startTime;
-		System.out.println("Time To Clone: " + duration/1000000000 + " seconds");
+		Core.debug("Time To Clone: " + duration/1000000000 + " seconds");
 		return clone;
 	}
 	
