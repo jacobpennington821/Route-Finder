@@ -385,27 +385,37 @@ public class Graph {
 								}
 							}
 						} else {
-							if(!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))){ // If ref is the same compare name instead
-								if(i != reverseRoute.size() - 1){ // Ensures this isnt the first direction
-									if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){ // Check for more than two arcs - reduces false positives
-										output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, ");
-										previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource();
-										output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
-									}
-								}else{
-									output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along ");
-									compassDirection = true;
-								}
-								currentRoadName = currentArc.tagList.get("name");
-								if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){
-									if(currentRoadName == null){ // Only needs to check for a name as this code block is only executed if ref is already null
-										Core.debug("Unnamed Road");
-										output.append("Unnamed Road\n");
+							if (currentRoadRef == currentArc.tagList.get("ref")) { // If the refs are equal but they're both null then use names instead, otherwise its the same road
+								if (!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))) { // If ref is the same compare name instead
+									if (i != reverseRoute.size() - 1) { // Ensures this isnt the first direction
+										if (vertexMapMirror.get(reverseRoute.get(i)).arcList.size() > 2) { // Check for more than two arcs - reduces false positives
+											output.append("After "
+													+ Utilities.round((vertexMapMirror.get(reverseRoute.get(i))
+															.getDistanceFromSource() - previousDirectionDistance), 2)
+													+ " km, ");
+											previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i))
+													.getDistanceFromSource();
+											output.append("turn " + calculateDirection(reverseRoute.get(i + 1),
+													reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+										}
 									} else {
-										Core.debug(currentRoadName);
-										output.append(currentRoadName + "\n");
+										output.append("Travel "
+												+ getBearingString(reverseRoute.get(i), reverseRoute.get(i - 1))
+												+ " along ");
+										compassDirection = true;
 									}
-								}
+									currentRoadName = currentArc.tagList.get("name");
+									if (vertexMapMirror.get(reverseRoute.get(i)).arcList.size() > 2
+											|| compassDirection) {
+										if (currentRoadName == null) { // Only needs to check for a name as this code block is only executed if ref is already null
+											Core.debug("Unnamed Road");
+											output.append("Unnamed Road\n");
+										} else {
+											Core.debug(currentRoadName);
+											output.append(currentRoadName + "\n");
+										}
+									}
+								} 
 							}
 						}
 					} else { // Triggered if the vertex has a value for the "junction" tag
