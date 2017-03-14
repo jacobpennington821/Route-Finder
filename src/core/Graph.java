@@ -1,7 +1,5 @@
 package core;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -359,7 +357,7 @@ public class Graph {
 					if(currentArc.tagList.get("junction") == null){ // Checks the vertex isn't the first in a roundabout
 						if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found
 							if(i != reverseRoute.size() - 1){// Ensures this is not the first direction
-								if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2){ // Checks if the vertex actually has more than two arcs coming off it - only two means there isnt any choice of where to turn - no direction required
+								if(vertexMapMirror.get(reverseRoute.get(i)).arcList.size() > 2){ // Checks if the vertex actually has more than two arcs coming off it - only two means there isnt any choice of where to turn - no direction required
 									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
 									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource(); // Assigns the distance from the source of the current vertex to previousDirectionDistance so that the next direction can measure the distance since the previous direction
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto "); // Adds the turn direction to the output using the previous, current and next vertexes
@@ -370,7 +368,7 @@ public class Graph {
 							}
 							currentRoadRef = currentArc.tagList.get("ref"); // Stores the current road ref and name for use in later comparisons
 							currentRoadName = currentArc.tagList.get("name"); // ^
-							if(vertexMap.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){ // Only triggers if the turning can have more than one option - one option is not a turning
+							if(vertexMapMirror.get(reverseRoute.get(i)).arcList.size() > 2 || compassDirection){ // Only triggers if the turning can have more than one option - one option is not a turning
 								if (currentRoadRef == null) {
 									if (currentRoadName == null) {
 										Core.debug("Unnamed Road");
@@ -449,7 +447,7 @@ public class Graph {
 		}
 		calculatedRouteDistance = vertexMapMirror.get(reverseRoute.get(0)).getDistanceFromSource();
 		calculatedRouteTime = vertexMapMirror.get(reverseRoute.get(0)).getWeightedDistanceFromSource();
-		output.append("Time = " + vertexMapMirror.get(reverseRoute.get(0)).getWeightedDistanceFromSource() + "\n");
+		output.append("You will have arrived at your destination\n");
 		return output.toString().replaceAll("&apos;", "'");
 	}
 	
@@ -540,8 +538,8 @@ public class Graph {
 	private HashMap<String,Vertex> cloneVertexMap(HashMap<String,Vertex> vertexMapToClone){
 		final double startTime = System.nanoTime();
 		HashMap<String,Vertex> clone = new HashMap<String,Vertex>();
-		for(String key : vertexMap.keySet()){
-			clone.put(key, vertexMap.get(key).clone());
+		for(String key : vertexMapToClone.keySet()){
+			clone.put(key, vertexMapToClone.get(key).clone());
 		}
 		final double duration = System.nanoTime() - startTime;
 		Core.debug("Time To Clone: " + duration/1000000000 + " seconds");

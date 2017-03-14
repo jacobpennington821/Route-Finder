@@ -8,7 +8,6 @@ public class Core {
 	public static final boolean debug = true;
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		final double startTime = System.nanoTime();
 	    try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); // Sets the look and feel of the UI

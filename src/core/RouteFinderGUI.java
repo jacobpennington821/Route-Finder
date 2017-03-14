@@ -122,6 +122,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         				parser.map.shortestRoute(originResponse, viaResponse);
         				tabPane.setSelectedIndex(1);
         				outputBox.append(parser.map.convertGraphToDirections());
+        				outputBox.append("\n");
         				distanceOfRoute = parser.map.calculatedRouteDistance;
         				timeOfRoute = parser.map.calculatedRouteTime;
         				Core.debug(viaResponse + " to " + destinationResponse);
