@@ -349,6 +349,7 @@ public class Graph {
 		boolean compassDirection = false; // A marker for if the direction is a "Travel east" direction
 		String roundaboutEntry = ""; // Stores the value of the first vertex's id in a roundabout
 		double previousDirectionDistance = 0;
+		int directionCounter = 1;
 		for(int i = reverseRoute.size() - 1; i >= 0; i--){ // Iterates through every vertex in the route
 			compassDirection = false; // Resets the marker for if the direction is a "Travel north" direction on each new vertex
 			if(i != 0){ // Ensures no arc is retrieved using only one vertex - can't do i - 1 if i == 0
@@ -358,13 +359,15 @@ public class Graph {
 						if(!Utilities.checkStringsAreEqual(currentRoadRef, currentArc.tagList.get("ref"))){ // If the ref is of a new road it means a junction has been found
 							if(i != reverseRoute.size() - 1){// Ensures this is not the first direction
 								if(vertexMapMirror.get(reverseRoute.get(i)).arcList.size() > 2){ // Checks if the vertex actually has more than two arcs coming off it - only two means there isnt any choice of where to turn - no direction required
-									output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
+									output.append(directionCounter + ") After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Adds "After x km," to the string, x is calculated from the last time a direction is called
 									previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource(); // Assigns the distance from the source of the current vertex to previousDirectionDistance so that the next direction can measure the distance since the previous direction
 									output.append("turn " + calculateDirection(reverseRoute.get(i + 1), reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto "); // Adds the turn direction to the output using the previous, current and next vertexes
+									directionCounter++;
 								}
 							}else{ // Triggered if the instruction is the first instruction
-								output.append("Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along "); // Adds the first direction format of "Travel north along "
+								output.append(directionCounter + ") Travel " + getBearingString(reverseRoute.get(i),reverseRoute.get(i-1)) + " along "); // Adds the first direction format of "Travel north along "
 								compassDirection = true; // A marker to ensure that the road name adding section is executed even though the direction is not a turning
+								directionCounter++;
 							}
 							currentRoadRef = currentArc.tagList.get("ref"); // Stores the current road ref and name for use in later comparisons
 							currentRoadName = currentArc.tagList.get("name"); // ^
@@ -387,7 +390,8 @@ public class Graph {
 								if (!Utilities.checkStringsAreEqual(currentRoadName, currentArc.tagList.get("name"))) { // If ref is the same compare name instead
 									if (i != reverseRoute.size() - 1) { // Ensures this isnt the first direction
 										if (vertexMapMirror.get(reverseRoute.get(i)).arcList.size() > 2) { // Check for more than two arcs - reduces false positives
-											output.append("After "
+											output.append(directionCounter 
+													+ ") After "
 													+ Utilities.round((vertexMapMirror.get(reverseRoute.get(i))
 															.getDistanceFromSource() - previousDirectionDistance), 2)
 													+ " km, ");
@@ -395,12 +399,14 @@ public class Graph {
 													.getDistanceFromSource();
 											output.append("turn " + calculateDirection(reverseRoute.get(i + 1),
 													reverseRoute.get(i), reverseRoute.get(i - 1)) + " onto ");
+											directionCounter++;
 										}
 									} else {
-										output.append("Travel "
+										output.append(directionCounter + ") Travel "
 												+ getBearingString(reverseRoute.get(i), reverseRoute.get(i - 1))
 												+ " along ");
 										compassDirection = true;
+										directionCounter++;
 									}
 									currentRoadName = currentArc.tagList.get("name");
 									if (vertexMapMirror.get(reverseRoute.get(i)).arcList.size() > 2
@@ -425,11 +431,12 @@ public class Graph {
 				} else { // Triggered when the marker for being in a roundabout is true
 					if(currentArc.tagList.get("junction") == null){ // Checks if the current arc is no longer in the roundabout - otherwise do nothing and go to the next arc
 						inRoundabout = false; // Flags the function is no longer in a roundabout and normal directions can continue
-						output.append("After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Calculates the distance since the last direction
+						output.append(directionCounter + ") After " + Utilities.round((vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource() - previousDirectionDistance),2) + " km, "); // Calculates the distance since the last direction
 						previousDirectionDistance = vertexMapMirror.get(reverseRoute.get(i)).getDistanceFromSource(); // Assigns the current vertex's distance from source as the direction distance
 						output.append("take the " + Utilities.formatNumberToPlace(getExitOnRoundabout(roundaboutEntry, reverseRoute.get(i-1))) + " exit on the roundabout, onto "); // Works out the exit on the roundabout by using the first vertex on the roundabout and the first vertex after that isnt
 						currentRoadRef = currentArc.tagList.get("ref");
 						currentRoadName = currentArc.tagList.get("name");
+						directionCounter++;
 						if(currentRoadRef == null){
 							if(currentRoadName == null){
 								output.append("Unnamed Road\n");
