@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
@@ -24,6 +26,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	private Parser parser;                   //->
 	private JTextField destinationInputField;//-->
 	private JTextField originInputField;     //---> Variables and fields that need to be accessed from multiple functions
+	private JTextField viaInputField;
 	private JTabbedPane tabPane;             //---> 
 	DataHandler dataHandler;                 //-->
 	private JTextArea outputBox;             //->
@@ -32,12 +35,30 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	boolean travelVia = false;
 	private double distanceOfRoute = 0;
 	private double timeOfRoute = 0;
+	private KeyListener textBoxListener;
 
 	
 	public RouteFinderGUI(Parser parser){ // GUI requires the parser being created before being constructed itself - byproduct of single threading means parser needs to parse map before showing UI
 		this.parser = parser;
 		this.dataHandler = new DataHandler(parser); // Datahandler deals with manipulating inputs to return values that can be used in the core program
 		this.setTitle("Route Finder");
+		textBoxListener = new KeyListener() {
+				
+			@Override
+			public void keyTyped(KeyEvent e) {			
+			}
+				
+			@Override
+			public void keyReleased(KeyEvent e) {				
+			}
+				
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER){
+					callRouteCalculations();
+				}
+			}
+		};
 		initComponents(); // Creates UI components
 		this.pack(); // Compresses the window down to make sure there's no extra blank space to the bottom or side of the window
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,9 +68,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		tabPane = new JTabbedPane(); // Creates the main tabs
 		tabPane.addTab("Input", makeInputPanel());
 		tabPane.addTab("Text Display", makeDirectionPanel());
-		//tabPane.addTab("Map Display", makeMapPanel());
 		this.add(tabPane); // Adds the tabbed pane to the JFrame
-		this.setJMenuBar(constructMenuBar());
 		this.addWindowListener(new WindowAdapter() {
 			public void windowOpened(WindowEvent e){
 				originInputField.requestFocusInWindow(); // Ensures that when the window is loaded the first text entry field has the focus
@@ -66,6 +85,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         originInputField = new JTextField(20); // Creates a text field of 20 columns
         JLabel destinationInputLabel = new JLabel("Input Destination");
         destinationInputField = new JTextField(20);
+        destinationInputField.addKeyListener(textBoxListener);
         JCheckBox viaCheckbox = new JCheckBox("Travel Via");
         viaCheckbox.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent event){
@@ -79,84 +99,12 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         	}
         });
         JLabel viaInputLabel = new JLabel("Travel Via");
-        JTextField viaInputField = new JTextField(20);
+        viaInputField = new JTextField(20);
+        viaInputField.addKeyListener(textBoxListener);
         JButton calculateButton = new JButton("Calculate Route");
         calculateButton.addActionListener(new ActionListener() { // Creates the method for what to do when the "calculate" button is pressed
         	public void actionPerformed(ActionEvent event){
-        		outputBox.setText(""); // Clears the output box
-    			Core.debug("Calculate Route");
-    			if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){ // Checks if text present in both fields
-    				showWarning("Please complete all fields.", "Incomplete Fields");
-    			}else{
-    				String originResponse = dataHandler.convertInputToNodeId(originInputField.getText()); // Sends the origin text to the data handler for processing
-    				if(originResponse == "!internet"){
-    					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
-    					return;
-    				}
-    				if(originResponse == "!presence" || originResponse == null){
-    					showWarning("Origin not present on current map. Please refine your search", "Node Not Present");
-    					return;
-    				}
-    				
-    				String destinationResponse = dataHandler.convertInputToNodeId(destinationInputField.getText()); // Sends the destination text to the data handler
-    				if(destinationResponse == "!internet"){
-    					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
-    					return;
-    				}
-    				if(destinationResponse == "!presence" || destinationResponse == null){
-    					showWarning("Destination not present on current map. Please refine your search", "Node Not Present");
-    					return;
-    				}
-    				
-    				if(travelVia){
-        				String viaResponse = dataHandler.convertInputToNodeId(viaInputField.getText()); // Sends the destination text to the data handler
-        				if(viaResponse == "!internet"){
-        					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
-        					return;
-        				}
-        				if(viaResponse == "!presence" || viaResponse == null){
-        					showWarning("Travel Via destination not present on current map. Please refine your search", "Node Not Present");
-        					return;
-        				}
-        				Core.debug(originResponse + " to " + viaResponse);
-        				parser.map.shortestRoute(originResponse, viaResponse);
-        				tabPane.setSelectedIndex(1);
-        				outputBox.append(parser.map.convertGraphToDirections());
-        				outputBox.append("\n");
-        				distanceOfRoute = parser.map.calculatedRouteDistance;
-        				timeOfRoute = parser.map.calculatedRouteTime;
-        				Core.debug(viaResponse + " to " + destinationResponse);
-        				parser.map.shortestRoute(viaResponse, destinationResponse);
-        				outputBox.append(parser.map.convertGraphToDirections());
-        				distanceOfRoute += parser.map.calculatedRouteDistance;
-        				timeOfRoute += parser.map.calculatedRouteTime;
-
-    				}else{
-        				parser.map.shortestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
-        				tabPane.setSelectedIndex(1); // Changes the tab to the output tab
-        				outputBox.append(parser.map.convertGraphToDirections()); // Adds the directions to the output tab
-        				distanceOfRoute = parser.map.calculatedRouteDistance;
-        				timeOfRoute = parser.map.calculatedRouteTime;
-    				}
-    				distanceLabel.setText("Distance: " + Utilities.round(distanceOfRoute,2) + " km");
-    				if(timeOfRoute < 1){
-    					if(timeOfRoute < (0.017)){
-    						timeLabel.setText("Time: " + Double.toString(Utilities.round((timeOfRoute*60)*60, 0)).replaceAll(".0", "") + " seconds");
-    						// Seconds scale
-    					} else {
-    						timeLabel.setText("Time: " + Double.toString(Utilities.round(timeOfRoute*60, 0)).replaceAll(".0", "") + " minutes");
-    						// Minutes scale
-    					}
-    				}else{
-    					timeLabel.setText("Time: " 
-    					+ Double.toString(Math.floor(timeOfRoute)).replaceAll(".0", "")
-    					+ " hour(s), "
-    					+ Double.toString((Utilities.round((timeOfRoute - Math.floor(timeOfRoute)) * 60,0))).replaceAll(".0", "")
-    					+ " minute(s)");
-    					
-    					// Hours and minutes scale
-    				}
-    			}
+        		callRouteCalculations();
         	}
         });
         layout.setAutoCreateGaps(true); // Makes sure everything is spaced nicely
@@ -275,29 +223,89 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		return panel;
 	}
 	
-	private JMenuBar constructMenuBar(){
-		JMenuBar menuBar = new JMenuBar();
-		JMenu fileMenu = new JMenu("File");
-		JMenuItem run = new JMenuItem("Run");
-		run.addActionListener(this);
-		fileMenu.add(run);
-		menuBar.add(fileMenu);
-		return menuBar;
-	}
+	private void callRouteCalculations(){
+		outputBox.setText(""); // Clears the output box
+		Core.debug("Calculate Route");
+		if(originInputField.getText().equals("") || destinationInputField.getText().equals("")){ // Checks if text present in both fields
+			showWarning("Please complete all fields.", "Incomplete Fields");
+		}else{
+			String originResponse = dataHandler.convertInputToNodeId(originInputField.getText()); // Sends the origin text to the data handler for processing
+			if(originResponse == "!internet"){
+				showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
+				return;
+			}
+			if(originResponse == "!presence" || originResponse == null){
+				showWarning("Origin not present on current map. Please refine your search", "Node Not Present");
+				return;
+			}
+			
+			String destinationResponse = dataHandler.convertInputToNodeId(destinationInputField.getText()); // Sends the destination text to the data handler
+			if(destinationResponse == "!internet"){
+				showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
+				return;
+			}
+			if(destinationResponse == "!presence" || destinationResponse == null){
+				showWarning("Destination not present on current map. Please refine your search", "Node Not Present");
+				return;
+			}
+			
+			if(travelVia){
+				String viaResponse = dataHandler.convertInputToNodeId(viaInputField.getText()); // Sends the destination text to the data handler
+				if(viaResponse == "!internet"){
+					showWarning("No Internet Connection, please use hardcoded node Ids", "No Internet Connection");
+					return;
+				}
+				if(viaResponse == "!presence" || viaResponse == null){
+					showWarning("Travel Via destination not present on current map. Please refine your search", "Node Not Present");
+					return;
+				}
+				Core.debug(originResponse + " to " + viaResponse);
+				parser.map.shortestRoute(originResponse, viaResponse);
+				tabPane.setSelectedIndex(1);
+				outputBox.append(parser.map.convertGraphToDirections());
+				outputBox.append("\n");
+				distanceOfRoute = parser.map.calculatedRouteDistance;
+				timeOfRoute = parser.map.calculatedRouteTime;
+				Core.debug(viaResponse + " to " + destinationResponse);
+				parser.map.shortestRoute(viaResponse, destinationResponse);
+				outputBox.append(parser.map.convertGraphToDirections());
+				distanceOfRoute += parser.map.calculatedRouteDistance;
+				timeOfRoute += parser.map.calculatedRouteTime;
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		JMenuItem source = (JMenuItem)(event.getSource());
-		if(source.getText() == "Run"){
-			Core.debug("Run Clicked");
-			parser.parseXMLtoGraph(parser.xmlFile);
+			}else{
+				parser.map.shortestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
+				tabPane.setSelectedIndex(1); // Changes the tab to the output tab
+				outputBox.append(parser.map.convertGraphToDirections()); // Adds the directions to the output tab
+				distanceOfRoute = parser.map.calculatedRouteDistance;
+				timeOfRoute = parser.map.calculatedRouteTime;
+			}
+			distanceLabel.setText("Distance: " + Utilities.round(distanceOfRoute,2) + " km");
+			if(timeOfRoute < 1){
+				if(timeOfRoute < (0.017)){
+					timeLabel.setText("Time: " + Double.toString(Utilities.round((timeOfRoute*60)*60, 0)).replaceAll(".0", "") + " seconds");
+					// Seconds scale
+				} else {
+					timeLabel.setText("Time: " + Double.toString(Utilities.round(timeOfRoute*60, 0)).replaceAll(".0", "") + " minutes");
+					// Minutes scale
+				}
+			}else{
+				timeLabel.setText("Time: " 
+				+ Double.toString(Math.floor(timeOfRoute)).replaceAll(".0", "")
+				+ " hour(s), "
+				+ Double.toString((Utilities.round((timeOfRoute - Math.floor(timeOfRoute)) * 60,0))).replaceAll(".0", "")
+				+ " minute(s)");
+				
+				// Hours and minutes scale
+			}
 		}
 	}
 
 	@Override
-	public void itemStateChanged(ItemEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	public void actionPerformed(ActionEvent event) {
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent arg0) {		
 	}
 	
 	public void showWarning(String content, String title){ // Creates a warning message with the passed text
