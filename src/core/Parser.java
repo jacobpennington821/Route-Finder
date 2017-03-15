@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class Parser {
 	
-	URL path = getClass().getResource("wiltshireRoadsNoRelations.osm"); // File location to load
+	URL path = getClass().getResource("defaultMap.osm"); // File location to load
 
 	File xmlFile;
 	int nodeCounter = 0;
