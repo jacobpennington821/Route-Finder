@@ -141,14 +141,19 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
     				distanceLabel.setText("Distance: " + Utilities.round(distanceOfRoute,2) + " km");
     				if(timeOfRoute < 1){
     					if(timeOfRoute < (0.017)){
-    						timeLabel.setText("Time: " + Utilities.round((timeOfRoute*60)*60, 0) + " seconds");
+    						timeLabel.setText("Time: " + Double.toString(Utilities.round((timeOfRoute*60)*60, 0)).replaceAll(".0", "") + " seconds");
     						// Seconds scale
     					} else {
-    						timeLabel.setText("Time: " + Utilities.round(timeOfRoute*60, 0) + " minutes");
+    						timeLabel.setText("Time: " + Double.toString(Utilities.round(timeOfRoute*60, 0)).replaceAll(".0", "") + " minutes");
     						// Minutes scale
     					}
     				}else{
-    					timeLabel.setText("Time: " + Utilities.round(timeOfRoute, 2) + " hours");
+    					timeLabel.setText("Time: " 
+    					+ Double.toString(Math.floor(timeOfRoute)).replaceAll(".0", "")
+    					+ " hour(s), "
+    					+ Double.toString((Utilities.round((timeOfRoute - Math.floor(timeOfRoute)) * 60,0))).replaceAll(".0", "")
+    					+ " minute(s)");
+    					
     					// Hours and minutes scale
     				}
     			}
