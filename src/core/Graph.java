@@ -15,7 +15,6 @@ public class Graph {
 	private HashMap<String,Arc> arcMap = new HashMap<String,Arc>(); // Same as above but with arcs
 	HashMap<String,Vertex> vertexMapMirror;
 	
-	private String lastEnteredSource;
 	private String lastEnteredDestination;
 	
 	public double calculatedRouteDistance = 0;
@@ -33,7 +32,6 @@ public class Graph {
 		System.out.println("Memory Usage Before Clone: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
 		vertexMapMirror = cloneVertexMap(vertexMap);
 		System.out.println("Memory Usage After Clone: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
-		lastEnteredSource = source;
 		lastEnteredDestination = destination;
 		Core.debug("-------------------------------- BEGIN DIJKSTRA'S ----------------------------");
 		Core.debug("Going from " + source + " to " + destination);
@@ -118,6 +116,7 @@ public class Graph {
 		return null;
 	}
 	
+	@SuppressWarnings("unused")
 	private String getVertexWithLowestDistance(Set<String> set){ // Returns the vertex with the lowest distance from source in a hashset
 		Double minimum = null; // Using the double wrapper class so that it can be assigned a null value for when first initialised
 		String minimumVertex = null;
@@ -322,7 +321,6 @@ public class Graph {
 	
 	private Arc getArcConnectingTwoVertexes(String vertexId1, String vertexId2){ // Finds the id of an arc connecting two vertexes together
 		Vertex vertex1 = vertexMapMirror.get(vertexId1);
-		Vertex vertex2 = vertexMapMirror.get(vertexId2);
 		for(int i = 0; i < vertex1.arcList.size(); i++){ // Iterates through every arc connected to the first vertex
 			if(arcMap.get(vertex1.arcList.get(i)).getStart().equals(vertexId2) || arcMap.get(vertex1.arcList.get(i)).getEnd().equals(vertexId2)){ // Checks if the current arc also has the second vertex as a member
 				return arcMap.get(vertex1.arcList.get(i)); // If so return that arc

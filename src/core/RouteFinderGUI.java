@@ -3,7 +3,6 @@ package core;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -18,7 +17,6 @@ import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
 
 import javax.swing.*;
-import javax.swing.GroupLayout.ParallelGroup;
 
 @SuppressWarnings("serial")
 public class RouteFinderGUI extends JFrame implements ActionListener, ItemListener{
@@ -98,7 +96,6 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
         		}
         	}
         });
-        JLabel viaInputLabel = new JLabel("Travel Via");
         viaInputField = new JTextField(20);
         viaInputField.addKeyListener(textBoxListener);
         JButton calculateButton = new JButton("Calculate Route");
@@ -216,13 +213,6 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		return panel;
 	}
 	
-	private JComponent makeMapPanel(){
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(1,1));
-		panel.setPreferredSize(new Dimension(500,400));
-		return panel;
-	}
-	
 	private void callRouteCalculations(){
 		outputBox.setText(""); // Clears the output box
 		Core.debug("Calculate Route");
@@ -282,17 +272,17 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 			distanceLabel.setText("Distance: " + Utilities.round(distanceOfRoute,2) + " km");
 			if(timeOfRoute < 1){
 				if(timeOfRoute < (0.017)){
-					timeLabel.setText("Time: " + Double.toString(Utilities.round((timeOfRoute*60)*60, 0)).replaceAll(".0", "") + " seconds");
+					timeLabel.setText("Time: " + Double.toString(Utilities.round((timeOfRoute*60)*60, 0)).replaceAll("\\.0", "") + " seconds");
 					// Seconds scale
 				} else {
-					timeLabel.setText("Time: " + Double.toString(Utilities.round(timeOfRoute*60, 0)).replaceAll(".0", "") + " minutes");
+					timeLabel.setText("Time: " + Double.toString(Utilities.round(timeOfRoute*60, 0)).replaceAll("\\.0", "") + " minutes");
 					// Minutes scale
 				}
 			}else{
 				timeLabel.setText("Time: " 
-				+ Double.toString(Math.floor(timeOfRoute)).replaceAll(".0", "")
+				+ Double.toString(Math.floor(timeOfRoute)).replaceAll("\\.0", "")
 				+ " hour(s), "
-				+ Double.toString((Utilities.round((timeOfRoute - Math.floor(timeOfRoute)) * 60,0))).replaceAll(".0", "")
+				+ Double.toString((Utilities.round((timeOfRoute - Math.floor(timeOfRoute)) * 60,0))).replaceAll("\\.0", "")
 				+ " minute(s)");
 				
 				// Hours and minutes scale
