@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class Parser {
 	
 	String path = "resources/defaultMap.osm"; // File location to load
-
+	public boolean filePresent = false;
 	File xmlFile;
 	int nodeCounter = 0;
 	int wayCounter = 0;
@@ -39,13 +39,17 @@ public class Parser {
 		try {
 			out = new PrintStream(new FileOutputStream("resources/output.log")); // Ensures that all console output is redirected to a text file for reviewing
 			System.setOut(out);
+			xmlFile = new File(path);
+			if(xmlFile.exists()){
+				filePresent = true;
+				this.map = this.parseXMLtoGraph(xmlFile); // Immediately parses the xml file once the class is initialised
+			} else {
+				filePresent = false; // If the file is not present then the program should not attempt to parse the file
+			}
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 			Core.debug(e1.getMessage());
 		}
-		xmlFile = new File(path);
-		this.map = this.parseXMLtoGraph(xmlFile); // Immediately parses the xml file once the class is initialised
-
 	}
 	
 	public Graph parseXMLtoGraph(File XMLfile){

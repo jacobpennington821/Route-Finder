@@ -60,6 +60,10 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		initComponents(); // Creates UI components
 		this.pack(); // Compresses the window down to make sure there's no extra blank space to the bottom or side of the window
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		if(!parser.filePresent){ // Checks if the file is present
+			showWarning("There is no map file at " + parser.path + " \nTherefore the program will not function.", "File Not Present");
+			System.exit(ERROR);
+		}
 	}
 	
 	private void initComponents(){
