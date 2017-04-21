@@ -8,34 +8,40 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 
+/**
+ * The class for dealing with converting input from the UI into IDs that the core program can use.
+ * @author Jacob Pennington
+ *
+ */
 public class DataHandler { // The data handler receives input from the GUI and performs operations such as lookups
 	
 	private String origin;
 	private String destination;
 	private Parser parser;
 	
-	public DataHandler(String origin, String destination, Parser parser){
-		this.origin = origin;
-		this.destination = destination;
-		this.parser = parser; // Parser contains information about the map loaded, therefore parser has to be initialised before using the data handler
-		this.convertInputToNodeId(this.origin);
-		this.convertInputToNodeId(this.destination);
-	}
-	
+	/**
+	 * Constructor for creating the DataHandler
+	 * @param parser - The parser object to use, contains all map data to use.
+	 */
 	public DataHandler(Parser parser){ // Single argument constructor for simplicity
-		this.parser = parser;
+		this.parser = parser; // Parser contains information about the map loaded, therefore parser has to be initialised before using the data handler
 	}
 	
-	public String convertInputToNodeId(String name){ // Takes an input in the form of a string such as "3 Smith Road Wiltshire"
+	/**
+	 * Converts an input into a node ID.
+	 * @param input - The input string.
+	 * @return A String of a node ID, or an error in the form "!presence" or "!internet"
+	 */
+	public String convertInputToNodeId(String input){ // Takes an input in the form of a string such as "3 Smith Road Wiltshire"
 		String nodeId = "";
-		if(isANumber(name)){ // If the string entered is just a number - assume it is a node id
-			nodeId = name.trim();
+		if(isANumber(input)){ // If the string entered is just a number - assume it is a node id
+			nodeId = input.trim();
 			if(parser.vertexMap.get(nodeId) != null){ // Checks to see if node id is present on the currently loaded map
 				return nodeId;
 			}
 			return "!presence";
 		}
-		String urlString = "http://nominatim.openstreetmap.org/search?q=" + name.replace(' ', '+') + "&format=xml&addressdetails=1"; // Nominatim is an online lookup which can convert addresses to osm ids
+		String urlString = "http://nominatim.openstreetmap.org/search?q=" + input.replace(' ', '+') + "&format=xml&addressdetails=1"; // Nominatim is an online lookup which can convert addresses to osm ids
 		URL website;
 		try {
 			website = new URL(urlString);
@@ -86,6 +92,11 @@ public class DataHandler { // The data handler receives input from the GUI and p
 		return null;
 	}
 	
+	/**
+	 * Converts a Way ID to a node ID usable by the shortest route methods.
+	 * @param wayId - A way ID on the current map.
+	 * @return A vertex/node ID on the given way.
+	 */
 	private String convertWayIdToNodeId(String wayId){ // Calculates a best guess of a node id from a way id
 		String parsedWayId = wayId + "-0"; // Assumes that the node id is placed on the first part of the way parsed by the parser
 		Core.debug("Way Id to convert: " + parsedWayId);
@@ -101,6 +112,11 @@ public class DataHandler { // The data handler receives input from the GUI and p
 		return bestGuessNodeId;
 	}
 	
+	/**
+	 * A simple utility method to return whether a String is a number.
+	 * @param str - The string to check.
+	 * @return True if the string is all numbers, false if not.
+	 */
 	public boolean isANumber(String str){ // Checks through a string to check if it is a number
 	    for (char c : str.toCharArray()) // Iterates through every character in a string
 	    {

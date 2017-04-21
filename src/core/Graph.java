@@ -5,6 +5,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The class for storing vertexes and arcs in a weighted graph.
+ * <p>
+ * Stores vertexes and arcs as well as containing methods for manipulating the graph such as
+ * shortest route calculations and length calculations.
+ * @author Jacob Pennington
+ *
+ */
 public class Graph {
 	
 	public static final int EARTHDIAMETER = 12742;
@@ -20,6 +28,12 @@ public class Graph {
 	public double calculatedRouteDistance = 0;
 	public double calculatedRouteTime = 0;
 	
+	/**
+	 * Constructs the graph object then calculates all weights and
+	 * marks non-traversable arcs.
+	 * @param vertexMap - The hashmap of vertex objects to use.
+	 * @param arcMap - The hashmap of arc objects to use.
+	 */
 	public Graph(HashMap<String,Vertex> vertexMap, HashMap<String,Arc> arcMap){
 		this.vertexMap = vertexMap;
 		this.arcMap = arcMap;
@@ -28,7 +42,15 @@ public class Graph {
 		vertexMapMirror = cloneVertexMap(vertexMap);
 	}
 	
-	public Graph shortestRoute(String source, String destination){ // Calculates the shortest route from one vertex to another using dijkstra's algorithm - https://en.wikipedia.org/wiki/Dijkstra's_algorithm
+	/**
+	 * Calculates the quickest route from one vertex to another using Dijkstra's algorithm
+	 * <p>
+	 * Calculates the shortest route using distances weighted by the maximum speed of the road to give time. 
+	 * https://en.wikipedia.org/wiki/Dijkstra's_algorithm
+	 * @param source - The ID of the source node in the vertex hashmap
+	 * @param destination - The ID of the destination node in the vertex hashmap
+	 */
+	public void quickestRoute(String source, String destination){ // Calculates the quickest route from one vertex to another using dijkstra's algorithm - https://en.wikipedia.org/wiki/Dijkstra's_algorithm
 		System.out.println("Memory Usage Before Clone: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
 		vertexMapMirror = cloneVertexMap(vertexMap);
 		System.out.println("Memory Usage After Clone: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
@@ -43,16 +65,16 @@ public class Graph {
 		unsettledVertexes.add(source); // The source node is added to the list of unsettled vertexes
 		while(unsettledVertexes.size() > 0){ // Loop until no vertexes are unsettled
 			String workingVertex = getVertexWithLowestWeightedDistance(unsettledVertexes); // The current working vertex is assigned to the vertex in the unsettled vertex hashset with the shortest distance from any currently settled vertex
-			if(workingVertex.equals(destination)){
-				String previousVertex = vertexMapMirror.get(workingVertex).getPreviousVertex();
+			if(workingVertex.equals(destination)){ // If the current working vertex is the destination then the route has been found
+				String previousVertex = vertexMapMirror.get(workingVertex).getPreviousVertex(); // Gets the previous vertex before the destination
 				Core.debug("  " + workingVertex);
 				Core.debug("ROUTE FOUND:");
-				while(previousVertex != null){
+				while(previousVertex != null){ // Iterates back through each vertex in the route to print out the route taken
 					Core.debug("  " + vertexMapMirror.get(previousVertex).getPreviousVertex() + " - " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("ref") + ", " + getArcConnectingTwoVertexes(previousVertex, workingVertex).tagList.get("name"));
 					workingVertex = previousVertex;
-					previousVertex = vertexMapMirror.get(previousVertex).getPreviousVertex();
+					previousVertex = vertexMapMirror.get(previousVertex).getPreviousVertex(); // Gets the next vertex in the route
 				}
-				return null;
+				return; // Finishes the method
 			}
 			Core.debug("Using Vertex: " + workingVertex);
 			unsettledVertexes.remove(workingVertex); // Transfers the current vertex from the unsettled hashset to the settled hashset
@@ -113,9 +135,14 @@ public class Graph {
 		for(String vertexId : unsettledVertexes){
 			Core.debug(vertexId);
 		}
-		return null;
+		return;
 	}
 	
+	/**
+	 * Returns the vertex ID in the given hashset with the lowest value for distanceFromSource.
+	 * @param set - The hashset of vertex IDs to scan.
+	 * @return The vertex ID in the hashset with the lowest value for distanceFromSource.
+	 */
 	@SuppressWarnings("unused")
 	private String getVertexWithLowestDistance(Set<String> set){ // Returns the vertex with the lowest distance from source in a hashset
 		Double minimum = null; // Using the double wrapper class so that it can be assigned a null value for when first initialised
@@ -136,6 +163,11 @@ public class Graph {
 		return minimumVertex;
 	}
 	
+	/**
+	 * Returns the vertex ID in the given hashset with the lowest value for weightedDistanceFromSource.
+	 * @param set - The hashset of vertex IDs to scan.
+	 * @return The vertex ID in the hashset with the lowest value for weightedDistanceFromSource.
+	 */
 	private String getVertexWithLowestWeightedDistance(Set<String> set){ // As above but using weighted distances instead of distance
 		Double minimum = null;
 		String minimumVertex = null;
@@ -155,6 +187,9 @@ public class Graph {
 		return minimumVertex;
 	}
 	
+	/**
+	 * Iterates through the arc hashmap and calculates both distance and weighted distance for each arc. Then assigns the values to each arc.
+	 */
 	private void calculateWeights(){ // Assigns distances and times to each arc in km and hours respectively
 		double lat1,lon1,lat2,lon2,temp,distance,weightedDistance;
 		for(String key : arcMap.keySet()){ // Iterates through every arc in the arc hashmap
@@ -169,13 +204,18 @@ public class Graph {
 			//Core.debug("Way Id: " + tempArc.id);
 			//Core.debug("  Dist: " + distance);
 			//Core.debug("  Estimated Max Speed: " + getMaxSpeed(tempArc) + " kph"); 
-			weightedDistance = distance/(getMaxSpeed(tempArc)); // Calculates weighted distance which is equal to time in hours of road by dividing distance by the average speed
+			weightedDistance = distance/(getAverageSpeed(tempArc)); // Calculates weighted distance which is equal to time in hours of road by dividing distance by the average speed
 			//Core.debug("  Weighted Distance: " + weightedDistance); 
 			tempArc.setWeightedDistance(weightedDistance); // Assigns the weighted distance to the arc being used 
 		}
 	}
 	
-	private double getMaxSpeed(Arc arc){ // Returns the max speed in km/hr of a give arc
+	/**
+	 * Returns the the average speed of an arc based on its tag information.
+	 * @param arc - The arc to use.
+	 * @return The average speed of the arc passed.
+	 */
+	private double getAverageSpeed(Arc arc){ // Returns the max speed in km/hr of a give arc
 		double maxspeed = 0;
 		for(String tag : arc.tagList.keySet()){ // Iterates through every tag in the arc's taglist
 			switch(tag){ // Switch is in order of priority
@@ -283,6 +323,9 @@ public class Graph {
 		return maxspeed * MAXSPEEDDAMPENING;
 	}
 	
+	/**
+	 * Iterates through the arc hashmap and marks any one way streets accordingly.
+	 */
 	private void calculateNonTraversableArcs(){
 		for(String key : arcMap.keySet()){ // Iterates through every arc in the arc hashmap
 			Arc tempArc = arcMap.get(key); // Stores the currently used arc temporarily for manipulating
@@ -319,6 +362,12 @@ public class Graph {
 		}
 	}
 	
+	/**
+	 * Returns the Arc object that has both vertex IDs as its start and end.
+	 * @param vertexId1 - The first vertex ID to use.
+	 * @param vertexId2 - The second vertex ID to use.
+	 * @return The Arc object that connects the two vertexes, else returns null.
+	 */
 	private Arc getArcConnectingTwoVertexes(String vertexId1, String vertexId2){ // Finds the id of an arc connecting two vertexes together
 		Vertex vertex1 = vertexMapMirror.get(vertexId1);
 		for(int i = 0; i < vertex1.arcList.size(); i++){ // Iterates through every arc connected to the first vertex
@@ -329,6 +378,10 @@ public class Graph {
 		return null;
 	}
 	
+	/**
+	 * Converts the vertexMapMirror and arcMapMirror into directions that can be easily followed.
+	 * @return A string of directions.
+	 */
 	public String convertGraphToDirections(){ // Converts the current vertexMap to directions
 		StringBuilder output = new StringBuilder(); // The overall output stringbuilder that is added to with each direction
 		String workingVertex = lastEnteredDestination;
@@ -455,7 +508,12 @@ public class Graph {
 		output.append("You will have arrived at your destination\n");
 		return output.toString().replaceAll("&apos;", "'");
 	}
-	
+	/**
+	 * Calculates the angle between two vertexes relative to north.
+	 * @param vertexId1 - The first vertex ID to use.
+	 * @param vertexId2 - The second vertex ID to use.
+	 * @return The angle between two vertexes in radians.
+	 */
 	private double calculateBearing(String vertexId1, String vertexId2){ // Calculates the angle between two vertexes relative to north
 		Vertex vertex1 = vertexMapMirror.get(vertexId1);
 		Vertex vertex2 = vertexMapMirror.get(vertexId2);
@@ -472,6 +530,12 @@ public class Graph {
 		return bearing;
 	}
 	
+	/**
+	 * Gets a string of the bearing between two vertexes.
+	 * @param vertexId1 - The first vertex ID to use.
+	 * @param vertexId2 - The second vertex ID to use.
+	 * @return A string of the direction between two vertexes, north, south, east, west or invalid.
+	 */
 	private String getBearingString(String vertexId1, String vertexId2){ // Returns a string based bearing between two vertexes
 		double bearing = calculateBearing(vertexId1, vertexId2);
 		if(((7 * Math.PI) / 4 <= bearing && bearing <= 2 * Math.PI ) || (bearing >= 0 && bearing < (Math.PI / 4))){ // Northern quadrant contains from 7/4 pi to 0 and 0 to 1/4 pi
@@ -489,6 +553,13 @@ public class Graph {
 		return "invalid";
 	}
 	
+	/**
+	 * Calculates the direction change between three vertexes from vertex 1 to 2 to 3.
+	 * @param vertexId1 - The first vertex ID to use.
+	 * @param vertexId2 - The second vertex ID to use.
+	 * @param vertexId3 - The third vertex ID to use.
+	 * @return A string of either right, left or invalid.
+	 */
 	private String calculateDirection(String vertexId1, String vertexId2, String vertexId3){
 		double directionValue = calculateBearing(vertexId1,vertexId2) - calculateBearing(vertexId2,vertexId3); // Gets the difference between the two bearings
 		if((-Math.PI < directionValue && directionValue < 0) || (Math.PI < directionValue && directionValue < 2 * Math.PI)){
@@ -501,7 +572,12 @@ public class Graph {
 	}
 
 
-	
+	/**
+	 * Gets the number of valid exits that occur travelling around a roundabout before the given exit is reached.
+	 * @param startingVertex - The ID of the first vertex to use on the roundabout.
+	 * @param exitVertex - The ID of the exit vertex, not on the roundabout.
+	 * @return An integer of the number of valid exits that occur before reaching the given exit.
+	 */
 	private int getExitOnRoundabout(String startingVertex, String exitVertex){ // Returns the number of exits that occur before a given vertex is reached on a roundabout
 		Core.debug("Start: " + startingVertex + ", End: " + exitVertex);
 		String currentVertex = startingVertex;
@@ -539,16 +615,20 @@ public class Graph {
 	}
 	
 
-	
+	/**
+	 * Creates a new vertex hashmap identical to the given one, except cleansed of any distance values.
+	 * @param vertexMapToClone - The vertex map to clone.
+	 * @return A new vertex hashmap cleansed of any distance values.
+	 */
 	private HashMap<String,Vertex> cloneVertexMap(HashMap<String,Vertex> vertexMapToClone){
-		final double startTime = System.nanoTime();
-		HashMap<String,Vertex> clone = new HashMap<String,Vertex>();
-		for(String key : vertexMapToClone.keySet()){
-			clone.put(key, vertexMapToClone.get(key).clone());
+		final double startTime = System.nanoTime(); // Gets the start time of the operation in nanoseconds
+		HashMap<String,Vertex> clone = new HashMap<String,Vertex>(); // Creates a new hashmap to store the clones into
+		for(String key : vertexMapToClone.keySet()){ // Iterates through every vertex in the vertexMap
+			clone.put(key, vertexMapToClone.get(key).clone()); // Puts each cloned vertex into the new vertex map
 		}
-		final double duration = System.nanoTime() - startTime;
+		final double duration = System.nanoTime() - startTime; // Gets the time taken for the operation to complete in nanoseconds
 		Core.debug("Time To Clone: " + duration/1000000000 + " seconds");
-		return clone;
+		return clone; // Returns the new, cloned, hashmap
 	}
 	
 }

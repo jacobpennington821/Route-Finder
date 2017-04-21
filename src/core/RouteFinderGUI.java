@@ -18,24 +18,32 @@ import java.awt.print.PrinterException;
 
 import javax.swing.*;
 
+/**
+ * The class for creating and displaying the UI
+ * @author Jacob Pennington
+ *
+ */
 @SuppressWarnings("serial")
 public class RouteFinderGUI extends JFrame implements ActionListener, ItemListener{
 	
-	private Parser parser;                   //->
-	private JTextField destinationInputField;//-->
-	private JTextField originInputField;     //---> Variables and fields that need to be accessed from multiple functions
-	private JTextField viaInputField;
-	private JTabbedPane tabPane;             //---> 
-	DataHandler dataHandler;                 //-->
-	private JTextArea outputBox;             //->
-	private JLabel distanceLabel;
-	private JLabel timeLabel;
-	boolean travelVia = false;
-	private double distanceOfRoute = 0;
-	private double timeOfRoute = 0;
-	private KeyListener textBoxListener;
+	private Parser parser;                   // The parser with map data
+	private JTextField destinationInputField;// The destination input field
+	private JTextField originInputField;     // The origin input field
+	private JTextField viaInputField;		 // The via input field
+	private JTabbedPane tabPane;             // The tabbed pane at the top of the GUI
+	DataHandler dataHandler;                 // The DataHandler for converting inputs
+	private JTextArea outputBox;             // The output box on the second tab
+	private JLabel distanceLabel;			 // The distance label on the second tab
+	private JLabel timeLabel;				 // The time label on the second tab
+	boolean travelVia = false;				 // Flag for multiple destinations
+	private double distanceOfRoute = 0;		 // Distance of the route
+	private double timeOfRoute = 0;			 // Time of the route
+	private KeyListener textBoxListener;	 // KeyListener to deal with pressing enter
 
-	
+	/**
+	 * The constructor for creating the GUI and displaying any errors that may occur at startup.
+	 * @param parser - The parser object which contains map data.
+	 */
 	public RouteFinderGUI(Parser parser){ // GUI requires the parser being created before being constructed itself - byproduct of single threading means parser needs to parse map before showing UI
 		this.parser = parser;
 		this.dataHandler = new DataHandler(parser); // Datahandler deals with manipulating inputs to return values that can be used in the core program
@@ -53,7 +61,7 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
-					callRouteCalculations();
+					callRouteCalculations(); // Calls the calculations when enter is pressed
 				}
 			}
 		};
@@ -66,6 +74,9 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		}
 	}
 	
+	/**
+	 * Creates the GUI components.
+	 */
 	private void initComponents(){
 		tabPane = new JTabbedPane(); // Creates the main tabs
 		tabPane.addTab("Input", makeInputPanel());
@@ -78,6 +89,10 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		});
 	}
 
+	/**
+	 * Creates the "Input" tab and its contents.
+	 * @return The input tab in the form of a JComponent.
+	 */
 	private JComponent makeInputPanel(){
 		JPanel panel = new JPanel(); // Creates a panel to add everything to
 		GroupLayout layout = new GroupLayout(panel); 
@@ -149,6 +164,10 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		return panel;
 	}
 	
+	/**
+//	 * Creates the Output tab and its components.
+	 * @return The output tab in JComponent form.
+	 */
 	private JComponent makeDirectionPanel(){ // Creates the output panel
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout()); // Assigns the layout to GridBagLayout
@@ -217,6 +236,9 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 		return panel;
 	}
 	
+	/**
+	 * The method for validating any input, calling the route calculation methods and handling any errors.
+	 */
 	private void callRouteCalculations(){
 		outputBox.setText(""); // Clears the output box
 		Core.debug("Calculate Route");
@@ -254,28 +276,28 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 					return;
 				}
 				Core.debug(originResponse + " to " + viaResponse);
-				parser.map.shortestRoute(originResponse, viaResponse);
-				tabPane.setSelectedIndex(1);
-				outputBox.append(parser.map.convertGraphToDirections());
-				outputBox.append("\n");
-				distanceOfRoute = parser.map.calculatedRouteDistance;
-				timeOfRoute = parser.map.calculatedRouteTime;
+				parser.map.quickestRoute(originResponse, viaResponse); // Calls the first route calculation
+				tabPane.setSelectedIndex(1); // Moves the ui to the output tab
+				outputBox.append(parser.map.convertGraphToDirections()); // Gets the directions of the first calculation and adds it to the UI
+				outputBox.append("\n"); // Adds a new line before the next directions
+				distanceOfRoute = parser.map.calculatedRouteDistance; // Sets the distance to the first route's distance
+				timeOfRoute = parser.map.calculatedRouteTime; // Sets the time to the first route's time
 				Core.debug(viaResponse + " to " + destinationResponse);
-				parser.map.shortestRoute(viaResponse, destinationResponse);
-				outputBox.append(parser.map.convertGraphToDirections());
-				distanceOfRoute += parser.map.calculatedRouteDistance;
-				timeOfRoute += parser.map.calculatedRouteTime;
+				parser.map.quickestRoute(viaResponse, destinationResponse); // Calls the second route calculation
+				outputBox.append(parser.map.convertGraphToDirections()); // Adds the second set of directions to the UI
+				distanceOfRoute += parser.map.calculatedRouteDistance; // Adds the distance of the second route to the first route
+				timeOfRoute += parser.map.calculatedRouteTime; // Adds the time of the second route to the first route
 
 			}else{
-				parser.map.shortestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
+				parser.map.quickestRoute(originResponse, destinationResponse); // Calls the shortest route algorithm
 				tabPane.setSelectedIndex(1); // Changes the tab to the output tab
 				outputBox.append(parser.map.convertGraphToDirections()); // Adds the directions to the output tab
 				distanceOfRoute = parser.map.calculatedRouteDistance;
 				timeOfRoute = parser.map.calculatedRouteTime;
 			}
 			distanceLabel.setText("Distance: " + Utilities.round(distanceOfRoute,2) + " km");
-			if(timeOfRoute < 1){
-				if(timeOfRoute < (0.017)){
+			if(timeOfRoute < 1){ // If the time of the route is less than 1 hour
+				if(timeOfRoute < (0.017)){ // If the time of the route is less than 1 minute
 					timeLabel.setText("Time: " + Double.toString(Utilities.round((timeOfRoute*60)*60, 0)).replaceAll("\\.0", "") + " seconds");
 					// Seconds scale
 				} else {
@@ -284,11 +306,10 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 				}
 			}else{
 				timeLabel.setText("Time: " 
-				+ Double.toString(Math.floor(timeOfRoute)).replaceAll("\\.0", "")
+				+ Double.toString(Math.floor(timeOfRoute)).replaceAll("\\.0", "") // Number of hours rounded down
 				+ " hour(s), "
-				+ Double.toString((Utilities.round((timeOfRoute - Math.floor(timeOfRoute)) * 60,0))).replaceAll("\\.0", "")
+				+ Double.toString((Utilities.round((timeOfRoute - Math.floor(timeOfRoute)) * 60,0))).replaceAll("\\.0", "") // Number of minutes to 0 decimal places
 				+ " minute(s)");
-				
 				// Hours and minutes scale
 			}
 		}
@@ -302,6 +323,11 @@ public class RouteFinderGUI extends JFrame implements ActionListener, ItemListen
 	public void itemStateChanged(ItemEvent arg0) {		
 	}
 	
+	/**
+	 * A simple method to create a warning with specified content.
+	 * @param content - The text within the box.
+	 * @param title - The text on the header of the box.
+	 */
 	public void showWarning(String content, String title){ // Creates a warning message with the passed text
 		JOptionPane.showMessageDialog(this, content, title, JOptionPane.WARNING_MESSAGE);
 	}

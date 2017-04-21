@@ -2,6 +2,11 @@ package core;
 
 import java.util.HashMap;
 
+/**
+ * The class for storing information about arcs connecting two vertices.
+ * @author Jacob Pennington
+ *
+ */
 public class Arc {
 	
 	private String start; // A string that stores the id of the node at the start of the arc
@@ -12,7 +17,13 @@ public class Arc {
 	public HashMap<String,String> tagList = new HashMap<String, String>(); // A hashmap of all the tags attributed to the arc
 	private int oneWay = 0; // If the arc is one way - 1 means one way from start to end, -1 means one way from end to start, 0 means not one way
 
-	
+	/**
+	 * Constructs an arc with the given information.
+	 * @param start - The ID of the vertex the arc starts on.
+	 * @param end - The ID of the vertex the arc ends on.
+	 * @param id - The ID of the arc.
+	 * @param tagList - A hashmap of all the tags the arc has.
+	 */
 	public Arc(String start, String end, String id, HashMap<String,String> tagList){
 		this.setStart(start);
 		this.setEnd(end);
